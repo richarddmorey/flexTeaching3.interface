@@ -1,0 +1,105 @@
+/* https://stackoverflow.com/a/20741964/1129889 */
+
+.loading {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.5);
+    backdrop-filter: blur(10px);
+}
+.loading-wheel {
+    width: 20px;
+    height: 20px;
+    margin-top: -40px;
+    margin-left: -40px;
+    
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    
+    border-width: 30px;
+    border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+}
+.loading-style-2 .loading-wheel {
+    border-style: double;
+    border-color: #ccc transparent;
+}
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0);
+    }
+    100% {
+        -webkit-transform: rotate(-360deg);
+    }
+}
+
+/* Loading request stuff */
+.ft3-reload-modal {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: 
+      url('data:image/svg+xml;utf8,<svg style="transform:rotate(-0deg)" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 50 50"><text x="25" y="25" fill="white">↻</text></svg>') 0 0;
+    background-size: 100px;
+    background-color: rgba(0,0,0,.7);
+    backdrop-filter: blur(5px);
+    /*
+    background: repeating-linear-gradient(
+      -55deg,
+      rgba(34,34,34,.7),
+      rgba(34,34,34,.7) 10px,
+      rgba(51,51,51,.7) 10px,
+      rgba(51,51,51,.7) 20px
+    );
+    */
+    
+}
+
+/* Loading request stuff */
+.ft3-reload-modal-message {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: white;
+    font-size: 200%;
+    text-align: center;
+}
+
+.ft3-error-modal-container{
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.8);
+    backdrop-filter: blur(10px);
+}
+
+.ft3-error-modal-text{
+  margin: 0;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    color: white;
+    font-size: 200%;
+    text-align: center;
+}
+  
+
+

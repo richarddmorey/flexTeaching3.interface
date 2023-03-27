@@ -1,0 +1,19 @@
+Package: flexTeaching3.interface
+Type: Package
+Title: Front-end HTTP interface for the flexTeaching3 system
+Version: 1.0
+Date: 2022-11-21
+Author: Richard D. Morey
+Maintainer: Richard D. Morey <richarddmorey@gmail.com>
+Description: Uses RestRserve to serve a web interface to the flexTeaching3 assignment service.
+License: GPL3
+Encoding: UTF-8
+Imports: 
+    readr,
+    RestRserve,
+    assertthat,
+    flexTeaching3.api,
+    RCurl
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 4.2.0)

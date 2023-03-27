@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+	<meta name="author" content="AdminKit">
+	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+
+	<link rel="canonical" href="https://demo-basic.adminkit.io/pages-blank.html" />
+
+	<title>Blank Page | AdminKit Demo</title>
+
+	<link href="css/app.css" rel="stylesheet">
+	<link href="css/ft3_fingerprint.css" rel="stylesheet">	
+	<link href="css/ft3_modals.css" rel="stylesheet">
+	<link href="css/ft3_toggle.css" rel="stylesheet">
+	<link href="css/ft3_buttons.css" rel="stylesheet">
+	<link href="css/ft3_content_containers.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
+        integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
+        crossorigin="anonymous">
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js" integrity="sha512-naukR7I+Nk6gp7p5TMA4ycgfxaZBJ7MO5iC3Fp6ySQyKFHOGfpkSZkYVWV5R7u7cfAicxanwYQ5D1e17EfJcMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!---FT3_HEADERS--->
+
+</head>
+
+<body>
+  
+<script>
+  // Listen for a message from the iframe, so that we can resize it. This
+  // should only be sent when the iframe contains HTML.
+  addEventListener('message', function(e) {
+    if (isNaN(e.data)) return;
+    const iframe = document.querySelector('#ft3_html_iframe');
+    if(iframe !== null){
+      const resizeTo = parseInt(e.data);// + 10;
+      iframe.style.height = resizeTo + 'px';
+    }
+  }, false);
+</script>
+  
+	<div class="wrapper" id="flexTeaching-app" data-api-url="<!---FT3_API_LOCATION--->">
+		<nav id="sidebar" class="sidebar js-sidebar">
+			<div class="sidebar-content js-simplebar">
+				<a class="sidebar-brand" href="index.html">
+          <span class="align-middle">AdminKit</span>
+        </a>
+
+				<ul class="sidebar-nav">
+					<li class="sidebar-header">
+						Settings
+					</li>
+
+					<li class="sidebar-item">
+						<input id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked"></input>
+						<label for="ft_id_textbox">ID</label>
+						<div class="flexteaching-fingerprint-container">
+						  <div v-if="!loading & assignments_loaded & !outOfDate" v-html="identicon_html" id="flexteaching-fingerprint"></div>
+						</div>
+					</li>
+				</ul>	
+				<ul class="sidebar-nav" v-if="!ft_assignment_mode">
+					<li class="sidebar-item">
+						<input id="ft_solutions_checkbox" type="checkbox" v-model="ft_solutions" :disabled="ft_locked"></input>
+						<label for="ft_solutions_checkbox">Show solutions?</label>
+					</li>
+				
+					<li class="sidebar-item">
+						<input id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" | ft_locked'></input>
+						<label for="ft_seed_textbox">Seed</label>
+					</li>
+				
+				  <li class="sidebar-item">
+						<input id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked"></input>
+						<label for="ft_masterseed_textbox">Master seed</label>
+					</li>
+					
+				</ul>
+				
+				<!--div class="sidebar-cta">
+					<div class="sidebar-cta-content">
+					  Testing
+					</div>
+				</div-->
+			</div>
+		</nav>
+
+		<div class="main">
+			<nav class="navbar navbar-expand navbar-light navbar-bg">
+				<a class="sidebar-toggle js-sidebar-toggle">
+          <i class="hamburger align-self-center"></i>
+        </a>
+
+				<div class="navbar-collapse collapse">
+				  <label for="assignment-select">Select assignment:</label>
+				  <select id="assignment-select" v-model="ft_assignment" :disabled="ft_locked">
+				    <optgroup v-for="optgroup in ft_assignments" :label="optgroup.text">
+              <option v-for="option in optgroup.children" :value="option.id" :disabled="option.disabled">
+                {{ option.text }}
+              </option>
+				    </optgroup>
+          </select>
+            <label class="toggle">
+              <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
+              <span class="slider"></span>
+              <span class="labels" data-on="Assignment" data-off="Practice"></span>
+            </label>
+
+				</div>
+			</nav>
+
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<!--h1 class="h3 mb-3">Assignment</h1-->
+
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Assignment</h5>
+								</div>
+								<div class="card-body">
+								  <div class='ft_button_container'>
+								    <button v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading | error | outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</button>
+								  </div>
+								  <hr>
+                  <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
+								</div>
+								<div v-if='outOfDate & !loading' @click="update_content_and_buttons" class="ft3-reload-modal"><!--div class="ft3-reload-modal-message">Content is out of date. Click to load new content.</div--></div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</main>
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<p class="mb-0">
+								<a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>AdminKit</strong></a> &copy;
+							</p>
+						</div>
+						<div class="col-6 text-end">
+							<ul class="list-inline">
+								<li class="list-inline-item">
+									<a class="text-muted" href="https://adminkit.io/" target="_blank">Support</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="https://adminkit.io/" target="_blank">Help Center</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="https://adminkit.io/" target="_blank">Privacy</a>
+								</li>
+								<li class="list-inline-item">
+									<a class="text-muted" href="https://adminkit.io/" target="_blank">Terms</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+		<div v-if='loading' class="loading loading-style-2"><div class="loading-wheel"></div></div>
+		<div v-if='error' class="ft3-error-modal-container" @click="error=false; error_text='';"><div class="ft3-error-modal-text"><i class="fa-solid fa-lg fa-circle-exclamation"></i> {{error_text}} (click to dismiss)</div></div>
+
+	</div>
+
+	<script src="js/adminkit/app.js"></script>
+  <script src="js/flexTeaching.js" type = "module"></script>
+
+<!---FT3_FOOTERS--->  
+
+</body>
+
+</html>
