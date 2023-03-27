@@ -6,7 +6,7 @@ Date: 2022-11-21
 Author: Richard D. Morey
 Maintainer: Richard D. Morey <richarddmorey@gmail.com>
 Description: Uses RestRserve to serve a web interface to the flexTeaching3 assignment service.
-License: GPL3
+License: Mozilla Public License 2.0
 Encoding: UTF-8
 Imports: 
     readr,
