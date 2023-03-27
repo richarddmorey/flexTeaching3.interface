@@ -9,10 +9,9 @@
 #' @return
 #' @export
 #' @importFrom RestRserve Application BackendRserve CORSMiddleware
-#' @importFrom readr read_file
 #' @importFrom assertthat assert_that is.dir
 #' @importFrom RCurl url.exists
-#' @importFrom flexTeaching3.api ft3_options
+#' @importFrom flexTeaching3.api ft3_options ft3_read_file_text
 #'
 #' @examples
 ft3_serve_interface <- function(
@@ -59,7 +58,7 @@ ft3_serve_interface <- function(
       
       'interface/index.html' |>
         system.file(package = packageName()) |>
-        readr::read_file() -> html_content
+        flexTeaching3.api::ft3_read_file_text() -> html_content
       
       html_content |>
         gsub(x = _,
@@ -69,10 +68,10 @@ ft3_serve_interface <- function(
       
       if(!is.null(apkg_dir)){
         headers_fn <- file.path(apkg_dir, 'support/headers.html') 
-        headers_content <- ifelse(file.exists(headers_fn), readr::read_file(headers_fn), '')
+        headers_content <- ifelse(file.exists(headers_fn), flexTeaching3.api::ft3_read_file_text(headers_fn), '')
 
         footers_fn <- file.path(apkg_dir, 'support/footers.html') 
-        footers_content <- ifelse(file.exists(footers_fn), readr::read_file(footers_fn), '')
+        footers_content <- ifelse(file.exists(footers_fn), flexTeaching3.api::ft3_read_file_text(footers_fn), '')
       
         html_content |> 
           gsub(x = _,

@@ -1,7 +1,7 @@
 Package: flexTeaching3.interface
 Type: Package
 Title: Front-end HTTP interface for the flexTeaching3 system
-Version: 1.0
+Version: 0.1
 Date: 2022-11-21
 Author: Richard D. Morey
 Maintainer: Richard D. Morey <richarddmorey@gmail.com>
