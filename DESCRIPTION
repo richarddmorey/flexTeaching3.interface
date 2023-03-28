@@ -12,8 +12,9 @@ Imports:
     readr,
     RestRserve,
     assertthat,
-    flexTeaching3.api,
     RCurl
+Suggests:
+    flexTeaching3.api
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.2.0)

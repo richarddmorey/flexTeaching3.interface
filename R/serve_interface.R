@@ -1,26 +1,29 @@
 
 #' Title
 #'
-#' @param api location
-#' @param assignments_pkg 
-#' @param http_port 
-#' @param log_options
+#' @param api_location The URL for the api (without the '/ft3/api/v1/' appended)
+#' @param assignments_pkg Package containing the assignments
+#' @param http_port Port on which to start the server
+#' @param log_options List of options for the log, to be passed to RestRserve::Logger$new()
+#' @param ... Further arguments to be passed to the RestRserve backend's start() method
 #'
-#' @return
+#' @return The result from the RestRserve backend's start() method
 #' @export
 #' @importFrom RestRserve Application BackendRserve CORSMiddleware
 #' @importFrom assertthat assert_that is.dir
 #' @importFrom RCurl url.exists
-#' @importFrom flexTeaching3.api ft3_options ft3_read_file_text
 #'
 #' @examples
 ft3_serve_interface <- function(
   api_location = NULL,
-  assignments_pkg = flexTeaching3.api::ft3_options('assignments_pkg'),
+  assignments_pkg,
   http_port = 8081, 
-  log_options = list(level = 'off')
+  log_options = list(level = 'off'),
+  ...
 )
 {
+
+  find.package(assignments_pkg)
   
   # Check to make sure we can access the api
   assignments_url <- paste0(api_location, '/ft3/api/v1/assignments')
@@ -58,7 +61,7 @@ ft3_serve_interface <- function(
       
       'interface/index.html' |>
         system.file(package = packageName()) |>
-        flexTeaching3.api::ft3_read_file_text() -> html_content
+        ft3_read_file_text() -> html_content
       
       html_content |>
         gsub(x = _,
@@ -68,10 +71,10 @@ ft3_serve_interface <- function(
       
       if(!is.null(apkg_dir)){
         headers_fn <- file.path(apkg_dir, 'support/headers.html') 
-        headers_content <- ifelse(file.exists(headers_fn), flexTeaching3.api::ft3_read_file_text(headers_fn), '')
+        headers_content <- ifelse(file.exists(headers_fn), ft3_read_file_text(headers_fn), '')
 
         footers_fn <- file.path(apkg_dir, 'support/footers.html') 
-        footers_content <- ifelse(file.exists(footers_fn), flexTeaching3.api::ft3_read_file_text(footers_fn), '')
+        footers_content <- ifelse(file.exists(footers_fn), ft3_read_file_text(footers_fn), '')
       
         html_content |> 
           gsub(x = _,
@@ -97,5 +100,5 @@ ft3_serve_interface <- function(
   
   app$logger = do.call(what = RestRserve::Logger$new, args = log_options)
   backend = RestRserve::BackendRserve$new()
-  backend$start(app, http_port = http_port)
+  backend$start(app, http_port = http_port, ...)
 }

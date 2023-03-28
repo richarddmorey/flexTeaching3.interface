@@ -6,19 +6,25 @@
 \usage{
 ft3_serve_interface(
   api_location = NULL,
-  assignments_pkg = flexTeaching3.api::ft3_options("assignments_pkg"),
+  assignments_pkg,
   http_port = 8081,
-  log_options = list(level = "off")
+  log_options = list(level = "off"),
+  ...
 )
 }
 \arguments{
-\item{assignments_pkg}{}
+\item{api_location}{The URL for the api (without the '/ft3/api/v1/' appended)}
 
-\item{http_port}{}
+\item{assignments_pkg}{Package containing the assignments}
 
-\item{log_options}{}
+\item{http_port}{Port on which to start the server}
 
-\item{api}{location}
+\item{log_options}{List of options for the log, to be passed to RestRserve::Logger$new()}
+
+\item{...}{Further arguments to be passed to the RestRserve backend's start() method}
+}
+\value{
+The result from the RestRserve backend's start() method
 }
 \description{
 Title
