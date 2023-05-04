@@ -171,6 +171,7 @@ createApp({
                 this.ft_content = '';
                 this.$nextTick(function () {
                   this.ft_content = content;
+                  this.typesetMathjax();
                 })
               })
               .catch(error => {
@@ -238,7 +239,7 @@ createApp({
       this.$nextTick(function () {
         const div = document.querySelector('#ft_content').querySelector('iframe');
         if(!lng && (div === null || div.length===0)){
-          this.typesetMathjax();
+          // this.typesetMathjax();
           indirectEval(this.ft_javascript);
         }
       });
