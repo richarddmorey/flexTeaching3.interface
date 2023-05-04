@@ -130,12 +130,19 @@
 
       <v-main>
         <v-card variant='flat' id='ft_main' style='padding-top: 1em; padding-left: 1em; padding-right: 1em; min-height:100%'>
+          <v-overlay
+            :model-value='outOfDate && !loading'
+            class="ft3-reload-modal"
+            persistent
+            contained
+            @click="update_content_and_buttons"
+            scroll-strategy='block'
+          ></v-overlay>
           <v-toolbar color='white'>
             <v-btn v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || error || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
           </v-toolbar>
           <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
         </v-card>
-        <div v-if='outOfDate && !loading' @click="update_content_and_buttons" class="ft3-reload-modal"></div>
       </v-main>
     </v-layout>
   </v-sheet>
