@@ -6,12 +6,12 @@ iframe.ft3_content_pdf {
   height: 100vh;
 }
 
-/*
 iframe.ft3_content_html {
-
+  border: none;
 }
+
 
 div.content_fragment {
-  
+  margin: 1em;
 }
-*/
+

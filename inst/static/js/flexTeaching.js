@@ -1,6 +1,5 @@
 const { createApp } = Vue;
 const { createVuetify } = Vuetify
-
 const vuetify = createVuetify()
 
 const indirectEval = eval;
@@ -26,6 +25,7 @@ createApp({
   },
   data() {
     return { 
+      drawer: true,
       ft_id: params.id !== null ? params.id.trim() : '',
       ft_seed: params.seed !== null ? params.seed.trim() : 's33d',
       ft_buttons: [],
@@ -48,6 +48,9 @@ createApp({
     }
   },
   methods: {
+    copySeed() {
+      navigator.clipboard.writeText(this.ft_seed);
+    },
     downloadFile(url){
       window.open(url);
     },

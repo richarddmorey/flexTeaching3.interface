@@ -5,22 +5,20 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-	<meta name="author" content="AdminKit">
-	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<meta name="keywords" content="">
 
 	<link rel="preconnect" href="https://fonts.gstatic.com">
-	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
 
-	<link rel="canonical" href="https://demo-basic.adminkit.io/pages-blank.html" />
-
-	<title>Blank Page | AdminKit Demo</title>
+	<title>FlexTeaching3</title>
 	
 	<script src="https://unpkg.com/vue@latest"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.8.95/css/materialdesignicons.css">
 
-	<link href="css/app.css" rel="stylesheet">
 	<link href="css/bootstrap.css" rel="stylesheet">	
 	<link href="css/ft3_fingerprint.css" rel="stylesheet">	
 	<link href="css/ft3_modals.css" rel="stylesheet">
@@ -68,53 +66,21 @@
   }, false);
 </script>
   
-	<div class="wrapper" id="flexTeaching-app" data-api-url="<!---FT3_API_LOCATION--->">
-		<nav id="sidebar" class="sidebar js-sidebar">
-			<div class="sidebar-content js-simplebar">
-				<a class="sidebar-brand" href="index.html">
-          <span class="align-middle">AdminKit</span>
-        </a>
+  <div class="wrapper" id="flexTeaching-app" data-api-url="<!---FT3_API_LOCATION--->">
+    
+    <v-sheet>
+    <v-layout>
 
-				<ul class="sidebar-nav">
-					<li class="sidebar-header">
-						Settings
-					</li>
+      <v-app-bar
+        color="primary"
+        prominent
+      >
+        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-					<li class="sidebar-item">
-						<input id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked"></input>
-						<label for="ft_id_textbox">ID</label>
-						<div class="flexteaching-fingerprint-container">
-						  <div v-if="!loading & assignments_loaded & !outOfDate" v-html="identicon_html" id="flexteaching-fingerprint"></div>
-						</div>
-					</li>
-				</ul>	
-				<ul class="sidebar-nav" v-if="!ft_assignment_mode">
-					<li class="sidebar-item">
-						<input id="ft_solutions_checkbox" type="checkbox" v-model="ft_solutions" :disabled="ft_locked"></input>
-						<label for="ft_solutions_checkbox">Show solutions?</label>
-					</li>
-				
-					<li class="sidebar-item">
-						<input id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" | ft_locked'></input>
-						<label for="ft_seed_textbox">Seed</label>
-					</li>
-				
-				  <li class="sidebar-item">
-						<input id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked"></input>
-						<label for="ft_masterseed_textbox">Master seed</label>
-					</li>
-				</ul>
-			</div>
-		</nav>
+        <v-toolbar-title>FlexTeaching3</v-toolbar-title>
 
-		<div class="main">
-			<nav class="navbar navbar-expand navbar-light navbar-bg">
-				<a class="sidebar-toggle js-sidebar-toggle">
-          <i class="hamburger align-self-center"></i>
-        </a>
-
-				<div class="navbar-collapse collapse">
-          <v-autocomplete v-model="ft_assignment" :items="ft_assignments" label="Select assignment:" :disabled="ft_locked" no-data-text='No matching assignments found.'>
+        <v-spacer></v-spacer>
+        <v-autocomplete v-model="ft_assignment" :items="ft_assignments" label="Select assignment:" :disabled="ft_locked" no-data-text='No matching assignments found.'>
             <!-- See: https://github.com/vuetifyjs/vuetify/issues/16792 -->
             <template v-slot:item="{ item, props }">
               <v-divider v-if="item.raw.type === 'divider'"></v-divider>
@@ -126,66 +92,81 @@
             <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
             <span class="slider"></span>
             <span class="labels" data-on="Assignment" data-off="Practice"></span>
-          </label>
+          </label>      
+        </v-app-bar>
 
-				</div>
-			</nav>
-
-			<main class="content">
-				<div class="container-fluid p-0">
-					<div class="row">
-						<div class="col-12">
-							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title mb-0">Assignment</h5>
-								</div>
-								<div class="card-body">
-								  <div class='ft_button_container'>
-								    <button v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading | error | outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</button>
-								  </div>
-								  <hr>
-                  <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
-								</div>
-								<div v-if='outOfDate & !loading' @click="update_content_and_buttons" class="ft3-reload-modal"><!--div class="ft3-reload-modal-message">Content is out of date. Click to load new content.</div--></div>
-							</div>
+      <v-navigation-drawer
+        v-model="drawer"
+      >
+        <v-list>
+          <v-list-item>
+            <v-text-field id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked" label="ID"></v-text-field>
+          </v-list-item>
+          <v-list-item>
+            <div class="flexteaching-fingerprint-container">
+						  <div v-if="!loading && assignments_loaded && !outOfDate" v-html="identicon_html" id="flexteaching-fingerprint"></div>
 						</div>
-					</div>
+          </v-list-item>
+          <v-list-item>
+            <v-list v-if='!ft_assignment_mode'>
+              <v-list-item>
+                <v-checkbox label="Show solutions?" id="ft_solutions_checkbox" v-model="ft_solutions" :disabled="ft_locked"></v-checkbox>
+              </v-list-item>
+              <v-list-item>
+                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed"></v-text-field>
+              <v-tooltip text="Copy seed to clipboard">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" @click="copySeed">&#128203;</v-btn>
+                </template>
+              </v-tooltip>
+            </v-list-item>
+            <v-list-item>
+              <v-text-field id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked" label="Master seed"></v-text-field>
+            </v-list-item>
+            </v-list>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
 
-				</div>
-			</main>
-
-			<footer class="footer">
-				<div class="container-fluid">
-					<div class="row text-muted">
-						<div class="col-6 text-start">
-							<p class="mb-0">
-								<a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>AdminKit</strong></a> &copy;
-							</p>
-						</div>
-						<div class="col-6 text-end">
-							<ul class="list-inline">
-								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Support</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Help Center</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Privacy</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Terms</a>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</footer>
-		</div>
-		<div v-if='loading' class="loading loading-style-2"><div class="loading-wheel"></div></div>
-		<div v-if='error' class="ft3-error-modal-container" @click="error=false; error_text='';"><div class="ft3-error-modal-text"><i class="fa-solid fa-lg fa-circle-exclamation"></i> {{error_text}} (click to dismiss)</div></div>
-
-	</div>
+      <v-main>
+        <v-card variant='flat' id='ft_main' style='padding-top: 1em; padding-left: 1em; padding-right: 1em; min-height:100%'>
+          <v-toolbar color='white'>
+            <v-btn v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || error || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
+          </v-toolbar>
+          <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
+        </v-card>
+        <div v-if='outOfDate && !loading' @click="update_content_and_buttons" class="ft3-reload-modal"></div>
+      </v-main>
+    </v-layout>
+  </v-sheet>
+  
+  <!-- Loading overlay -->
+  <v-overlay
+    :model-value="loading"
+    class="align-center justify-center"
+  >
+    <v-progress-circular
+      color="primary"
+      indeterminate
+      size="64"
+    ></v-progress-circular>
+  </v-overlay>
+  
+  <!-- Modal for errors -->
+  <v-dialog
+  v-model="error"
+  width="auto"
+  >
+    <v-card>
+      <v-card-text prepend-icon="error">{{error_text}}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="error = false; error_text='';">OK</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+    
+  </div><!-- end ft3 app-->
 
 	<script src="js/adminkit/app.js"></script>
   <script src="js/flexTeaching.js" type = "module"></script>
