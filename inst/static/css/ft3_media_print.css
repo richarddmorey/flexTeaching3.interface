@@ -1,0 +1,11 @@
+@media print {
+  
+  header.v-toolbar{
+    display: none;
+  }
+  
+  nav.v-navigation-drawer{
+    display: none;
+  }
+  
+}
