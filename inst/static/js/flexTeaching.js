@@ -1,4 +1,7 @@
-import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+const { createApp } = Vue;
+const { createVuetify } = Vuetify
+
+const vuetify = createVuetify()
 
 const indirectEval = eval;
 
@@ -206,8 +209,16 @@ createApp({
     },
     assignments_loaded(loaded){
      this.loading = !loaded;
+     // find first non-header assignment
+     var first_assignment;
+     for(var i=0; this.ft_assignments.length; i++){
+      if(this.ft_assignments[i].type === undefined){
+        first_assignment = this.ft_assignments[i].value;
+        break;
+      }
+     }
      if(loaded)
-        this.ft_assignment = params.assignment !== null ? params.assignment : this.ft_assignments[0].children[0].id;
+        this.ft_assignment = params.assignment !== null ? params.assignment : first_assignment;
     },
     ft_solutions(solutions) {
       this.update_content_and_buttons();
@@ -251,11 +262,21 @@ createApp({
   async created() {
     const a = params.assignment === undefined ? '' : `?assignment=${params.assignment}`;
     const response = await fetch(`${this.ft_api}/ft3/api/v1/assignments${a}`);
-    this.ft_assignments = await response.json();
+    const fta0 = await response.json()
+    // Recode for v-select
+    this.ft_assignments = fta0.flatMap((el) => {
+	      return [ 
+  	      { title: el.text, type: 'header' }, 
+          el.children.map( (el) => { 
+            return { title: el.text, value: el.id, disabled: el.disabled } 
+            })
+        ].flat()
+      });
     this.assignments_loaded = true;
   }
 },
 {
     ft_api: document.querySelector('#flexTeaching-app').dataset.apiUrl
 })
+.use(vuetify)
 .mount('#flexTeaching-app')

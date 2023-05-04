@@ -15,6 +15,10 @@
 	<link rel="canonical" href="https://demo-basic.adminkit.io/pages-blank.html" />
 
 	<title>Blank Page | AdminKit Demo</title>
+	
+	<script src="https://unpkg.com/vue@latest"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.js"></script>
 
 	<link href="css/app.css" rel="stylesheet">
 	<link href="css/bootstrap.css" rel="stylesheet">	
@@ -36,14 +40,14 @@
     };
   </script>
   <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
         integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
-        crossorigin="anonymous">
-</script>
+        crossorigin="anonymous"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js" integrity="sha512-naukR7I+Nk6gp7p5TMA4ycgfxaZBJ7MO5iC3Fp6ySQyKFHOGfpkSZkYVWV5R7u7cfAicxanwYQ5D1e17EfJcMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js" integrity="sha512-naukR7I+Nk6gp7p5TMA4ycgfxaZBJ7MO5iC3Fp6ySQyKFHOGfpkSZkYVWV5R7u7cfAicxanwYQ5D1e17EfJcMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <!---FT3_HEADERS--->
 
@@ -99,14 +103,7 @@
 						<input id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked"></input>
 						<label for="ft_masterseed_textbox">Master seed</label>
 					</li>
-					
 				</ul>
-				
-				<!--div class="sidebar-cta">
-					<div class="sidebar-cta-content">
-					  Testing
-					</div>
-				</div-->
 			</div>
 		</nav>
 
@@ -117,28 +114,25 @@
         </a>
 
 				<div class="navbar-collapse collapse">
-				  <label for="assignment-select">Select assignment:</label>
-				  <select id="assignment-select" v-model="ft_assignment" :disabled="ft_locked">
-				    <optgroup v-for="optgroup in ft_assignments" :label="optgroup.text">
-              <option v-for="option in optgroup.children" :value="option.id" :disabled="option.disabled">
-                {{ option.text }}
-              </option>
-				    </optgroup>
-          </select>
-            <label class="toggle">
-              <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
-              <span class="slider"></span>
-              <span class="labels" data-on="Assignment" data-off="Practice"></span>
-            </label>
+          <v-autocomplete v-model="ft_assignment" :items="ft_assignments" label="Select assignment:" :disabled="ft_locked" no-data-text='No matching assignments found.'>
+            <!-- See: https://github.com/vuetifyjs/vuetify/issues/16792 -->
+            <template v-slot:item="{ item, props }">
+              <v-divider v-if="item.raw.type === 'divider'"></v-divider>
+              <v-list-subheader v-else-if="item.raw.type === 'header'">{{item.title}}</v-list-subheader>
+              <v-list-item v-else v-bind="props" :disabled="item.raw.disabled"></v-list-item>
+            </template>
+          </v-autocomplete>
+          <label class="toggle">
+            <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
+            <span class="slider"></span>
+            <span class="labels" data-on="Assignment" data-off="Practice"></span>
+          </label>
 
 				</div>
 			</nav>
 
 			<main class="content">
 				<div class="container-fluid p-0">
-
-					<!--h1 class="h3 mb-3">Assignment</h1-->
-
 					<div class="row">
 						<div class="col-12">
 							<div class="card">
