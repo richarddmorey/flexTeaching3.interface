@@ -242,6 +242,9 @@ createApp({
           indirectEval(this.ft_javascript);
         }
       });
+    },
+    error(err){
+      if(!err) this.error_text = '';
     }
   },
   computed: {

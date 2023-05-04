@@ -1,6 +1,10 @@
 /* https://stackoverflow.com/a/20741964/1129889 */
 
 
+.ft3_overlay_blur {
+  backdrop-filter: blur(5px);
+}
+
 /* Loading request stuff */
 .ft3-reload-modal {
     width: 100%;

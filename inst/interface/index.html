@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.js"></script>
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.8.95/css/materialdesignicons.css">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
 
 	<link href="css/bootstrap.css" rel="stylesheet">	
 	<link href="css/ft3_fingerprint.css" rel="stylesheet">	
@@ -143,7 +143,9 @@
   <!-- Loading overlay -->
   <v-overlay
     :model-value="loading"
-    class="align-center justify-center"
+    class="align-center justify-center ft3_overlay_blur"
+    persistent
+    scroll-strategy='block'
   >
     <v-progress-circular
       color="primary"
@@ -158,10 +160,17 @@
   width="auto"
   >
     <v-card>
-      <v-card-text prepend-icon="error">{{error_text}}
+      <v-container>
+        <v-row>
+      <v-col cols=2 style='color: red;font-size: 200%;'>&#9888;</v-col>
+      <v-col>
+      <v-card-text class="text-left">{{error_text}}
       </v-card-text>
+      </v-col>
+      </v-row>
+      </v-container>
       <v-card-actions>
-        <v-btn color="primary" block @click="error = false; error_text='';">OK</v-btn>
+        <v-btn color="primary" block @click="error = false">OK</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
