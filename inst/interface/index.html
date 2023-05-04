@@ -112,14 +112,16 @@
               <v-list-item>
                 <v-checkbox label="Show solutions?" id="ft_solutions_checkbox" v-model="ft_solutions" :disabled="ft_locked"></v-checkbox>
               </v-list-item>
+              <v-divider></v-divider>
               <v-list-item>
-                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed"></v-text-field>
-              <v-tooltip text="Copy seed to clipboard">
+                <v-tooltip text="Copy seed to clipboard">
                 <template v-slot:activator="{ props }">
                   <v-btn v-bind="props" @click="copySeed">&#128203;</v-btn>
                 </template>
               </v-tooltip>
+                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed"></v-text-field>
             </v-list-item>
+            <v-divider></v-divider>
             <v-list-item>
               <v-text-field id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked" label="Master seed"></v-text-field>
             </v-list-item>
