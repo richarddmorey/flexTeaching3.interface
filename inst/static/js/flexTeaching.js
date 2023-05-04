@@ -166,7 +166,12 @@ createApp({
                   return Promise.reject(error);
                 }
                 const content = await response.text();
-                this.ft_content = content;
+                // Destroy the content then remake, so that DOM elements are
+                // considered "new" (is there a better way to do this?)
+                this.ft_content = '';
+                this.$nextTick(function () {
+                  this.ft_content = content;
+                })
               })
               .catch(error => {
                 this.loading = false;
@@ -229,10 +234,10 @@ createApp({
     ft_masterseed(masterseed){
       if(masterseed !== '') this.updateSeed();
     },
-    ft_content(content){
+    loading(lng){
       this.$nextTick(function () {
         const div = document.querySelector('#ft_content').querySelector('iframe');
-        if(div === null || div.length===0){
+        if(!lng && (div === null || div.length===0)){
           this.typesetMathjax();
           indirectEval(this.ft_javascript);
         }
