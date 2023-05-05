@@ -28,6 +28,10 @@
 	<link href="css/ft3_media_print.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 	
+  <link rel="stylesheet"
+        href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/default.min.css">
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
+
   <script>
     MathJax = {
       tex: {
@@ -101,7 +105,7 @@
       >
         <v-list>
           <v-list-item>
-            <v-text-field id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked" label="ID"></v-text-field>
+            <v-text-field id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked" label="ID" @keyup.enter.native="update_content_and_buttons"></v-text-field>
           </v-list-item>
           <v-list-item>
             <div class="flexteaching-fingerprint-container">
@@ -120,11 +124,11 @@
                   <v-btn v-bind="props" @click="copySeed">&#128203;</v-btn>
                 </template>
               </v-tooltip>
-                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed"></v-text-field>
+                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed" @keyup.enter.native="update_content_and_buttons"></v-text-field>
             </v-list-item>
             <v-divider></v-divider>
             <v-list-item>
-              <v-text-field id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked" label="Master seed"></v-text-field>
+              <v-text-field id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked" label="Master seed" @keyup.enter.native="update_content_and_buttons"></v-text-field>
             </v-list-item>
             </v-list>
           </v-list-item>
@@ -187,7 +191,6 @@
     
   </div><!-- end ft3 app-->
 
-	<script src="js/adminkit/app.js"></script>
   <script src="js/flexTeaching.js" type = "module"></script>
 
 <!---FT3_FOOTERS--->  

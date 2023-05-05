@@ -54,11 +54,14 @@ createApp({
     downloadFile(url){
       window.open(url);
     },
-    async typesetMathjax(){
+    async typesetMathjax_hljs(){
       await typeset(() => {
-          const math = document.querySelector('#ft_content');
-          return [math];
+          const el = document.querySelector('#ft_content');
+          return [el];
           });
+      document.querySelectorAll('#ft_content pre code').forEach((el)=>{
+        hljs.highlightElement(el.parentNode);
+      })
     },
     update_content_and_buttons(){
       this.loading = true;
@@ -171,7 +174,7 @@ createApp({
                 this.ft_content = '';
                 this.$nextTick(function () {
                   this.ft_content = content;
-                  this.typesetMathjax();
+                  this.typesetMathjax_hljs();
                 })
               })
               .catch(error => {
@@ -239,7 +242,7 @@ createApp({
       this.$nextTick(function () {
         const div = document.querySelector('#ft_content').querySelector('iframe');
         if(!lng && (div === null || div.length===0)){
-          // this.typesetMathjax();
+          // this.typesetMathjax_hljs();
           indirectEval(this.ft_javascript);
         }
       });
