@@ -1,4 +1,13 @@
 
+# https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#tabnabbing
+prevent_tabnab = RestRserve::Middleware$new(
+  process_request = function(request, response) TRUE,
+  process_response = function(request, response){
+    response$set_header('Referrer-Policy', 'no-referrer')
+  },
+  id = "prev_tabnab"
+)
+
 #' Title
 #'
 #' @param api_location The URL for the api (without the '/ft3/api/v1/' appended)
@@ -31,7 +40,7 @@ ft3_serve_interface <- function(
     stop('The API at ', api_location,' could not be reached.', call. = FALSE)
 
   app = RestRserve::Application$new(
-    middleware = list(RestRserve::CORSMiddleware$new())
+    middleware = list(RestRserve::CORSMiddleware$new(), prevent_tabnab)
   )
   
   if(is.null(assignments_pkg)){
