@@ -59,8 +59,8 @@
 <body>
   
 <script>
-  // Listen for a message from the iframe, so that we can resize it. This
-  // should only be sent when the iframe contains HTML.
+  // Listen for a message from the iframe, so that we can resize it and/or scroll 
+  // to anchors. This should only be sent when the iframe contains HTML.
   addEventListener('message', function(e) {
     const d = JSON.parse(e.data);
     if(d.hasOwnProperty('height')){
