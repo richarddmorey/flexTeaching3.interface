@@ -12,6 +12,8 @@ prevent_tabnab = RestRserve::Middleware$new(
 #'
 #' @param api_location The URL for the api (without the '/ft3/api/v1/' appended)
 #' @param assignments_pkg Package containing the assignments
+#' @param practice_mode_message Message to give when switching to practice mode. Set to empty string to disable.
+#' @param assignment_mode_message Message to give when switching to assignment mode. Set to empty string to disable.
 #' @param http_port Port on which to start the server
 #' @param log_options List of options for the log, to be passed to RestRserve::Logger$new()
 #' @param ... Further arguments to be passed to the RestRserve backend's start() method
@@ -21,11 +23,14 @@ prevent_tabnab = RestRserve::Middleware$new(
 #' @importFrom RestRserve Application BackendRserve CORSMiddleware
 #' @importFrom assertthat assert_that is.dir
 #' @importFrom RCurl url.exists
+#' @importFrom jsonlite toJSON
+#' @importFrom RCurl base64Encode
 #'
-#' @examples
 ft3_serve_interface <- function(
   api_location = NULL,
   assignments_pkg,
+  practice_mode_message = '',
+  assignment_mode_message = '',
   http_port = 8081, 
   log_options = list(level = 'off'),
   ...
@@ -72,10 +77,18 @@ ft3_serve_interface <- function(
         system.file(package = packageName()) |>
         ft3_read_file_text() -> html_content
       
+      list(
+        api_location = api_location,
+        assignment_mode_message = assignment_mode_message,
+        practice_mode_message = practice_mode_message
+      ) |>
+        jsonlite::toJSON(auto_unbox = TRUE) |>
+        RCurl::base64Encode() -> settings
+      
       html_content |>
         gsub(x = _,
-             pattern = '<!---FT3_API_LOCATION--->',
-             replacement = api_location, 
+             pattern = '<!---FT3_SETTINGS--->',
+             replacement = settings, 
              fixed = TRUE) -> html_content
       
       if(!is.null(apkg_dir)){

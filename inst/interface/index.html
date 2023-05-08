@@ -81,18 +81,24 @@
   }, false);
 </script>
   
-  <div class="wrapper" id="flexTeaching-app" data-api-url="<!---FT3_API_LOCATION--->">
+  <div class="wrapper" id="flexTeaching-app" data-settings='<!---FT3_SETTINGS--->'>
     
     <v-sheet>
     <v-layout>
 
       <v-app-bar
-        color="primary"
+        :color="ft_assignment_mode ? 'indigo' : 'blue-gray-lighten-4'"
         prominent
       >
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
         <v-toolbar-title>FlexTeaching3</v-toolbar-title>
+        
+        <label class="toggle">
+          <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
+          <span class="slider"></span>
+          <span class="labels" data-on="Assignment" data-off="Practice"></span>
+        </label>   
 
         <v-spacer></v-spacer>
         <v-autocomplete v-model="ft_assignment" :items="ft_assignments" label="Select assignment:" :disabled="ft_locked" no-data-text='No matching assignments found.'>
@@ -103,15 +109,12 @@
               <v-list-item v-else v-bind="props" :disabled="item.raw.disabled"></v-list-item>
             </template>
           </v-autocomplete>
-          <label class="toggle">
-            <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
-            <span class="slider"></span>
-            <span class="labels" data-on="Assignment" data-off="Practice"></span>
-          </label>      
         </v-app-bar>
 
       <v-navigation-drawer
         v-model="drawer"
+        permanent
+        :color="ft_assignment_mode ? 'indigo-lighten-5' : ''"
       >
         <v-list>
           <v-list-item>
@@ -198,6 +201,23 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  
+    <v-dialog
+    v-model="switch_mode_dialog"
+    width="auto"
+    >
+    <v-card>
+      <v-card-text class="text-left" v-if='!ft_assignment_mode'>{{ft_practice_mode_message}}
+      </v-card-text>
+      <v-card-text class="text-left" v-if='ft_assignment_mode'>{{ft_assignment_mode_message}}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" block @click="switch_mode_dialog = false">OK</v-btn>
+      </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+  
     
   </div><!-- end ft3 app-->
 

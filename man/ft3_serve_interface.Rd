@@ -7,6 +7,8 @@
 ft3_serve_interface(
   api_location = NULL,
   assignments_pkg,
+  practice_mode_message = "",
+  assignment_mode_message = "",
   http_port = 8081,
   log_options = list(level = "off"),
   ...
@@ -16,6 +18,10 @@ ft3_serve_interface(
 \item{api_location}{The URL for the api (without the '/ft3/api/v1/' appended)}
 
 \item{assignments_pkg}{Package containing the assignments}
+
+\item{practice_mode_message}{Message to give when switching to practice mode. Set to empty string to disable.}
+
+\item{assignment_mode_message}{Message to give when switching to assignment mode. Set to empty string to disable.}
 
 \item{http_port}{Port on which to start the server}
 

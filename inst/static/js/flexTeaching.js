@@ -3,6 +3,11 @@ const { createVuetify } = Vuetify
 const vuetify = createVuetify()
 
 const indirectEval = eval;
+const app_settings = JSON.parse(
+  atob(
+    document.querySelector('#flexTeaching-app').dataset.settings
+    )
+  );
 
 function typeset(code) {
   MathJax.startup.promise = MathJax.startup.promise
@@ -21,10 +26,19 @@ createApp({
     ft_api: {
       type: String,
       required: true
+    },
+    ft_practice_mode_message: {
+      type: String,
+      required: true
+    },
+    ft_assignment_mode_message: {
+      type: String,
+      required: true
     }
   },
   data() {
     return { 
+      switch_mode_dialog: false,
       drawer: true,
       ft_id: params.id !== null ? params.id.trim() : '',
       ft_seed: params.seed !== null ? params.seed.trim() : 's33d',
@@ -200,7 +214,7 @@ createApp({
     },
     query_string(qs){
       if(this.assignments_loaded)
-        window.history.replaceState(null, null, qs);
+        window.history.replaceState(null, null, `${qs}&lock=${this.ft_locked}`);
       if(this.outOfDate){
         this.checkCache()
           .then((cached) => {
@@ -210,8 +224,14 @@ createApp({
         });
       }
     },
-    ft_assignment_mode(assignment_mode){
-      this.update_content_and_buttons();
+    ft_assignment_mode: {
+      handler(assignment_mode){
+        if(this.assignments_loaded) this.update_content_and_buttons();
+        this.switch_mode_dialog = 
+          (assignment_mode && this.ft_assignment_mode_message !== '') || 
+          (!assignment_mode && this.ft_practice_mode_message !== '');
+        },
+        immediate: true
     },
     ft_assignment(assignment){
       this.updateSeed()
@@ -291,7 +311,9 @@ createApp({
   }
 },
 {
-    ft_api: document.querySelector('#flexTeaching-app').dataset.apiUrl
+    ft_api: app_settings.api_location,
+    ft_practice_mode_message: app_settings.practice_mode_message,
+    ft_assignment_mode_message: app_settings.assignment_mode_message
 })
 .use(vuetify)
 .mount('#flexTeaching-app')

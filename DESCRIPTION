@@ -12,7 +12,8 @@ Imports:
     readr,
     RestRserve,
     assertthat,
-    RCurl
+    RCurl,
+    jsonlite
 Suggests:
     flexTeaching3.api
 RoxygenNote: 7.2.3
