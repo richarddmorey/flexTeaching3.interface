@@ -111,10 +111,6 @@
           </v-autocomplete>
         </v-app-bar>
 
-      <v-main>
-      
-      <v-container fluid>
-          
       <v-navigation-drawer
         v-model="drawer"
         permanent
@@ -152,7 +148,7 @@
         </v-list>
       </v-navigation-drawer>
 
-        
+      <v-main>
         <v-card variant='flat' id='ft_main' style='padding-top: 1em; padding-left: 1em; padding-right: 1em; min-height:100%'>
           <v-overlay
             :model-value='outOfDate && !loading'
@@ -167,7 +163,6 @@
           </v-toolbar>
           <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
         </v-card>
-        </v-container>
       </v-main>
     </v-layout>
   </v-sheet>
