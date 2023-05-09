@@ -34,13 +34,20 @@ createApp({
     ft_assignment_mode_message: {
       type: String,
       required: true
+    },
+    ft_auth_token: {
+      type: String,
+      required: false
+    },
+    ft_initial_assignment_string: {
+      type: String,
+      required: true
     }
   },
   data() {
     return { 
       switch_mode_dialog: false,
       drawer: true,
-      ft_auth_token: params.token !== null ? params.token : '',
       ft_id: params.id !== null ? params.id.trim() : '',
       ft_seed: params.seed !== null ? params.seed.trim() : 's33d',
       ft_buttons: [],
@@ -127,8 +134,6 @@ createApp({
           if (!response.ok) {
             // get error message from body or default to response status
             const error = (data && data.detail) || ('Error: '+ response.status);
-            this.error = true;
-            this.error_text = error;
             return Promise.reject(error);
           }
           data.configuration.url = url;
@@ -172,54 +177,60 @@ createApp({
     ft_new_content_config: {
       async handler(config, oldConfig) {
         const settings = config.settings;
-        const url = config.url;
-        var javascript = '';
-        if(config.file_ext === 'html'){
-          if(config.iframe){
-            this.ft_content = `<iframe id="ft3_html_iframe" class="ft3_content ft3_content_html" src="${url}?${settings}"></iframe>`;
-          }else{
-            javascript = config.js;
-            fetch(`${url}?${settings}`, {
-              headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-            })
-            .then(async response => {
-                const isJson = response.headers.get('content-type')?.includes('application/json');
-                const data = isJson ? await response.json() : null;
+        const url = `${config.url}?${settings}`;
+        const javascript = config.file_ext === 'html' && !config.iframe ? config.js : '';
+        fetch(url, {
+          headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+        })
+        .then(async response => {
+          const isJson = response.headers.get('content-type')?.includes('application/json');
+          const data = isJson ? await response.json() : null;
 
-                // check for error response
-                if (!response.ok) {
-                  // get error message from body or default to response status
-                  const error = (data && data.detail) || ('Error: '+ response.status);
-                  this.error = true;
-                  this.error_text = error;
-                  return Promise.reject(error);
-                }
-                const content = await response.text();
-                // Destroy the content then remake, so that DOM elements are
-                // considered "new" (is there a better way to do this?)
-                this.ft_content = '';
-                this.$nextTick(function () {
-                  this.ft_content = content;
-                  this.typesetMathjax_hljs();
-                })
-              })
-              .catch(error => {
-                this.loading = false;
-                this.error = true;
-                this.error_text = error;
-              });
+          // check for error response
+          if (!response.ok) {
+            // get error message from body or default to response status
+            const error = (data && data.detail) || ('Error: '+ response.status);
+            return Promise.reject(error);
           }
-        }else if(config.file_ext === 'pdf'){
-          this.ft_content = `<iframe class="ft3_content ft3_content_pdf" src="${url}?${settings}"></iframe>`;
-
-        }else{
+          if(config.file_ext === 'html' && !config.iframe){
+            const content = await response.text();
+            // Destroy the content then remake, so that DOM elements are
+            // considered "new" (is there a better way to do this?)
+            this.ft_content = '';
+            this.$nextTick(() => {
+              this.ft_content = content;
+              this.typesetMathjax_hljs();
+            });
+            return;
+          } 
+          // Anything below means we are using an iframe
+          if(config.file_ext !== 'html' && config.file_ext !== 'pdf'){
+            return Promise.reject('Error: Content file extension was of unexpected type.');
+          }
+          const blob = await response.blob();
+          const blob_url = URL.createObjectURL(blob);
+          if(config.file_ext === 'html'){
+            this.ft_content = `<iframe id="ft3_html_iframe" class="ft3_content ft3_content_html" src="${blob_url}"></iframe>`;
+          }else if(config.file_ext === 'pdf'){
+            this.ft_content = `<iframe class="ft3_content ft3_content_pdf" src="${blob_url}"></iframe>`;
+          }
+          setTimeout( () => {
+            // free up the memory
+            URL.revokeObjectURL(blob_url);
+          }, 5000);
+          return;
+        })
+        .then(()=>{
+          this.ft_pars = config.pars;
+          this.ft_identicon = config.fingerprint;
+          this.loading = false;
+          this.ft_javascript = javascript;
+        })
+        .catch(error => {
+          this.loading = false;
           this.error = true;
-          this.error_text = 'Error: Content type was not HTML or PDF. Please contact the administrator and let them know the assignment is misconfigured.'
-        }
-        this.ft_pars = config.pars;
-        this.ft_identicon = config.fingerprint;
-        this.loading = false;
-        this.ft_javascript = javascript;
+          this.error_text = error;
+        });
       },
       deep: true,
       immediate: false
@@ -307,10 +318,8 @@ createApp({
     }
   },
   async created() {
-    const a = params.assignment === undefined ? '' : `?assignment=${params.assignment}`;
-    console.log(`Token: "${params.token}"`);
-    fetch(`${this.ft_api}/ft3/api/v1/assignments${a}`, {
-        headers: {Authorization: `Bearer ${params.token}`}
+    fetch(`${this.ft_api}/ft3/api/v1/assignments${this.ft_initial_assignment_string}`, {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
       })
     .then(async response => {
         const isJson = response.headers.get('content-type')?.includes('application/json');
@@ -320,8 +329,6 @@ createApp({
         if (!response.ok) {
           // get error message from body or default to response status
           const error = (data && data.detail) || ('Error: '+ response.status);
-          this.error = true;
-          this.error_text = error;
           return Promise.reject(error);
         }
         // Recode for v-select
@@ -344,6 +351,8 @@ createApp({
 },
 {
     ft_api: app_settings.api_location,
+    ft_auth_token: params.token !== null ? params.token : '',
+    ft_initial_assignment_string: params.assignment === undefined ? '' : `?assignment=${params.assignment}`,
     ft_practice_mode_message: app_settings.practice_mode_message,
     ft_assignment_mode_message: app_settings.assignment_mode_message
 })
