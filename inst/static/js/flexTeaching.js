@@ -308,7 +308,6 @@ createApp({
   },
   async created() {
     const a = params.assignment === undefined ? '' : `?assignment=${params.assignment}`;
-    console.log(`Token: "${params.token}"`);
     fetch(`${this.ft_api}/ft3/api/v1/assignments${a}`, {
         headers: {Authorization: `Bearer ${params.token}`}
       })
