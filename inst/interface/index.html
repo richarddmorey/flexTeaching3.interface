@@ -111,11 +111,14 @@
           </v-autocomplete>
         </v-app-bar>
 
-      <v-navigation-drawer
+      <v-main>
+        <v-container fluid>
+          
+        <v-navigation-drawer
         v-model="drawer"
         permanent
         :color="ft_assignment_mode ? 'indigo-lighten-5' : ''"
-      >
+        >
         <v-list>
           <v-list-item>
             <v-text-field id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked" label="ID" @keyup.enter.native="update_content_and_buttons"></v-text-field>
@@ -148,7 +151,6 @@
         </v-list>
       </v-navigation-drawer>
 
-      <v-main>
         <v-card variant='flat' id='ft_main' style='padding-top: 1em; padding-left: 1em; padding-right: 1em; min-height:100%'>
           <v-overlay
             :model-value='outOfDate && !loading'
@@ -163,6 +165,7 @@
           </v-toolbar>
           <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
         </v-card>
+      </v-container>
       </v-main>
     </v-layout>
   </v-sheet>
