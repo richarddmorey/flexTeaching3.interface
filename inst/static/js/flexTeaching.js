@@ -40,6 +40,7 @@ createApp({
     return { 
       switch_mode_dialog: false,
       drawer: true,
+      ft_auth_token: params.token !== null ? params.token : '',
       ft_id: params.id !== null ? params.id.trim() : '',
       ft_seed: params.seed !== null ? params.seed.trim() : 's33d',
       ft_buttons: [],
@@ -86,7 +87,9 @@ createApp({
     },
     async new_buttons() {
       const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}/files`
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      });
       const { file_list: file_list } = await response.json();
 
       const settings = 
@@ -112,7 +115,10 @@ createApp({
         `assignment_mode=${this.ft_assignment_mode}`;
       const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}`;
       // https://jasonwatmore.com/post/2021/10/09/fetch-error-handling-for-failed-http-responses-and-network-errors
-      fetch(`${url}/configuration?${settings}`)
+      fetch(`${url}/configuration?${settings}`,
+      {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      })
         .then(async response => {
           const isJson = response.headers.get('content-type')?.includes('application/json');
           const data = isJson ? await response.json() : null;
@@ -141,7 +147,9 @@ createApp({
       const url = 
         `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}` +
         `/seed?masterseed=${masterseed}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      });
       const { pars: pars } = await response.json();
       this.ft_seed = pars.seed;
     },
@@ -152,7 +160,9 @@ createApp({
         `solutions=${this.ft_solutions}&` +
         `assignment_mode=${this.ft_assignment_mode}`;
       const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}`;
-      const response = await fetch(`${url}/cachekey?${settings}`);
+      const response = await fetch(`${url}/cachekey?${settings}`, {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      });
       const { cached: cached } = await response.json();
 
       return cached;
@@ -169,8 +179,10 @@ createApp({
             this.ft_content = `<iframe id="ft3_html_iframe" class="ft3_content ft3_content_html" src="${url}?${settings}"></iframe>`;
           }else{
             javascript = config.js;
-            fetch(`${url}?${settings}`)
-              .then(async response => {
+            fetch(`${url}?${settings}`, {
+              headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+            })
+            .then(async response => {
                 const isJson = response.headers.get('content-type')?.includes('application/json');
                 const data = isJson ? await response.json() : null;
 
@@ -296,18 +308,38 @@ createApp({
   },
   async created() {
     const a = params.assignment === undefined ? '' : `?assignment=${params.assignment}`;
-    const response = await fetch(`${this.ft_api}/ft3/api/v1/assignments${a}`);
-    const fta0 = await response.json()
-    // Recode for v-select
-    this.ft_assignments = fta0.flatMap((el) => {
-	      return [ 
-  	      { title: el.text, type: 'header' }, 
-          el.children.map( (el) => { 
-            return { title: el.text, value: el.id, disabled: el.disabled } 
-            })
-        ].flat()
-      });
-    this.assignments_loaded = true;
+    console.log(`Token: "${params.token}"`);
+    fetch(`${this.ft_api}/ft3/api/v1/assignments${a}`, {
+        headers: {Authorization: `Bearer ${params.token}`}
+      })
+    .then(async response => {
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+
+        // check for error response
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = (data && data.detail) || ('Error: '+ response.status);
+          this.error = true;
+          this.error_text = error;
+          return Promise.reject(error);
+        }
+        // Recode for v-select
+        this.ft_assignments = data.flatMap((el) => {
+	        return [ 
+  	        { title: el.text, type: 'header' }, 
+            el.children.map( (el) => { 
+              return { title: el.text, value: el.id, disabled: el.disabled } 
+              })
+          ].flat()
+        });
+        this.assignments_loaded = true;
+      })
+    .catch(error => {
+      this.loading = false;
+      this.error = true;
+      this.error_text = error;
+    });
   }
 },
 {

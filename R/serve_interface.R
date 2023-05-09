@@ -41,9 +41,13 @@ ft3_serve_interface <- function(
   
   # Check to make sure we can access the api
   assignments_url <- paste0(api_location, '/ft3/api/v1/assignments')
-  if(!RCurl::url.exists(assignments_url))
+  status_code = RCurl::url.exists(assignments_url, .header = TRUE)[['status']] |> as.integer()
+  if(
+    (as.integer(status_code / 100) != 2) && # "OK" status (in 200s)
+    (status_code != 401) # Authentication needed (still ok, for our purposes)
+  ){
     stop('The API at ', api_location,' could not be reached.', call. = FALSE)
-
+  }
   app = RestRserve::Application$new(
     middleware = list(RestRserve::CORSMiddleware$new(), prevent_tabnab)
   )
