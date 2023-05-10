@@ -74,7 +74,34 @@ createApp({
       navigator.clipboard.writeText(this.ft_seed);
     },
     downloadFile(url){
-      window.open(url);
+      let filename = '';
+      fetch(url,
+      {
+        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      })
+      .then((response) => {
+            const disposition = response.headers.get('Content-Disposition');
+            filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1];
+            if (filename.toLowerCase().startsWith("utf-8''"))
+              filename = decodeURIComponent(filename.replace(/utf-8''/i, ''));
+            else
+              filename = filename.replace(/['"]/g, '');
+            return response.blob();
+      })
+      .then((blob) => {
+        var blob_url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = blob_url;
+        a.download = filename;
+        document.body.appendChild(a); // append the element to the dom
+        a.click();
+        a.remove(); // afterwards, remove the element  
+        setTimeout( () => {
+            // free up the memory
+            URL.revokeObjectURL(blob_url);
+          }, 5000);
+      });
+      
     },
     async typesetMathjax_hljs(){
       await typeset(() => {
@@ -320,7 +347,7 @@ createApp({
   async created() {
     fetch(`${this.ft_api}/ft3/api/v1/assignments${this.ft_initial_assignment_string}`, {
         headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-      })
+    })
     .then(async response => {
         const isJson = response.headers.get('content-type')?.includes('application/json');
         const data = isJson ? await response.json() : null;
