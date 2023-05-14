@@ -1,6 +1,12 @@
 const { createApp } = Vue;
-const { createVuetify } = Vuetify
-const vuetify = createVuetify()
+const { createVuetify } = Vuetify;
+const { defineStore, createPinia, mapState, mapActions } = Pinia;
+
+const vuetify = createVuetify();
+const pinia = createPinia(); 
+
+import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
+import useAssignmentsStore from './ft3_components/assignmentsStore.js';
 
 const indirectEval = eval;
 const app_settings = JSON.parse(
@@ -9,19 +15,16 @@ const app_settings = JSON.parse(
     )
   );
 
-function typeset(code) {
-  MathJax.startup.promise = MathJax.startup.promise
-    .then(() => MathJax.typesetPromise(code()))
-    .catch((err) => console.log('Typeset failed: ' + err.message));
-  return MathJax.startup.promise;
-}
-
-// https://stackoverflow.com/a/901144/1129889
+// Get the params from the query string as default values (some to
+// be passed as props): see https://stackoverflow.com/a/901144/1129889
 const params = new Proxy(new URLSearchParams(window.location.search), {
   get: (searchParams, prop) => searchParams.get(prop),
 });
 
-createApp({
+const app = createApp({
+  //components: {
+  //  ButtonCounter
+  //},
   props: {
     ft_api: {
       type: String,
@@ -29,34 +32,36 @@ createApp({
     },
     ft_practice_mode_message: {
       type: String,
-      required: true
+      required: false
     },
     ft_assignment_mode_message: {
       type: String,
-      required: true
+      required: false
     },
     ft_auth_token: {
       type: String,
       required: false
     },
-    ft_initial_assignment_string: {
+    ft_initial_assignment: {
       type: String,
+      required: false
+    },
+    immediateUpdateWhenCached: {
+      type: Boolean,
       required: true
     }
   },
   data() {
     return { 
-      switch_mode_dialog: false,
-      drawer: true,
-      ft_id: params.id !== null ? params.id.trim() : '',
-      ft_seed: params.seed !== null ? params.seed.trim() : 's33d',
+      ft_assignment_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
+      ft_id: params.id ? params.id.trim() : '',
+      ft_seed: params.seed ? params.seed.trim() : 's33d',
+      ft_solutions: params.solutions ? params.solutions === 'true' : false,
+      ft_locked: params.lock ? params.lock === 'true' : false,
       ft_buttons: [],
-      ft_solutions: params.solutions !== null ? params.solutions === 'true' : false,
-      ft_locked: params.lock !== null ? params.lock === 'true' : false,
       ft_masterseed: '',
       ft_content: '',
       ft_new_content_config: {},
-      ft_assignment_mode: params.assignment_mode !== null ? params.assignment_mode === 'true' : false,
       ft_assignments: [],
       ft_assignment: '',
       ft_identicon: '',
@@ -65,43 +70,16 @@ createApp({
       loading: true,
       error: false,
       error_text: "",
-      assignments_loaded: false,
-      immediateUpdateWhenCached: true
+      switch_mode_dialog: false,
+      drawer: true,
     }
   },
   methods: {
     copySeed() {
       navigator.clipboard.writeText(this.ft_seed);
     },
-    downloadFile(url){
-      let filename = '';
-      fetch(url,
-      {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-      })
-      .then((response) => {
-            const disposition = response.headers.get('Content-Disposition');
-            filename = disposition.split(/;(.+)/)[1].split(/=(.+)/)[1];
-            if (filename.toLowerCase().startsWith("utf-8''"))
-              filename = decodeURIComponent(filename.replace(/utf-8''/i, ''));
-            else
-              filename = filename.replace(/['"]/g, '');
-            return response.blob();
-      })
-      .then((blob) => {
-        var blob_url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = blob_url;
-        a.download = filename;
-        document.body.appendChild(a); // append the element to the dom
-        a.click();
-        a.remove(); // afterwards, remove the element  
-        setTimeout( () => {
-            // free up the memory
-            URL.revokeObjectURL(blob_url);
-          }, 5000);
-      });
-      
+    async downloadFile(url){
+      await createFileDownload( url, this.ft_auth_token);
     },
     async typesetMathjax_hljs(){
       await typeset(() => {
@@ -148,26 +126,15 @@ createApp({
         `solutions=${this.ft_solutions}&` +
         `assignment_mode=${this.ft_assignment_mode}`;
       const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}`;
-      // https://jasonwatmore.com/post/2021/10/09/fetch-error-handling-for-failed-http-responses-and-network-errors
-      fetch(`${url}/configuration?${settings}`,
-      {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
+      fetchContent(
+        `${url}/configuration?${settings}`, 
+        this.ft_auth_token ? { headers: { Authorization: `Bearer ${this.ft_auth_token}` } } : {} )
+      .then((data)=>{
+        data.configuration.url = url;
+        data.configuration.settings = settings;
+        this.ft_new_content_config = data.configuration;
       })
-        .then(async response => {
-          const isJson = response.headers.get('content-type')?.includes('application/json');
-          const data = isJson ? await response.json() : null;
-
-          // check for error response
-          if (!response.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.detail) || ('Error: '+ response.status);
-            return Promise.reject(error);
-          }
-          data.configuration.url = url;
-          data.configuration.settings = settings;
-          this.ft_new_content_config = data.configuration;
-      })
-      .catch(error => {
+      .catch((error)=>{
         this.loading = false;
         this.error = true;
         this.error_text = error;
@@ -201,6 +168,12 @@ createApp({
     }
   },
   watch: {
+    assignments_loading_error(error){
+      if(!error) return;
+      this.loading = false;
+      this.error = true;
+      this.error_text = assignmentsStore.errorText;
+    },
     ft_new_content_config: {
       async handler(config, oldConfig) {
         const settings = config.settings;
@@ -290,17 +263,25 @@ createApp({
         })
     },
     assignments_loaded(loaded){
+      const data = assignmentsStore.assignments;
+		  // Recode for v-select
+		  this.ft_assignments = data.flatMap((el) => {
+			  return [{
+				    title: el.text,
+					  type: 'header'
+				  },
+				  el.children.map((el) => {
+					return {
+						  title: el.text,
+						  value: el.id,
+						  disabled: el.disabled
+					  }
+				  })
+			   ].flat()
+		  });
      this.loading = !loaded;
-     // find first non-header assignment
-     var first_assignment;
-     for(var i=0; this.ft_assignments.length; i++){
-      if(this.ft_assignments[i].type === undefined){
-        first_assignment = this.ft_assignments[i].value;
-        break;
-      }
-     }
      if(loaded)
-        this.ft_assignment = params.assignment !== null ? params.assignment : first_assignment;
+        this.ft_assignment = this.ft_initial_assignment || assignmentsStore.firstAssignment;
     },
     ft_solutions(solutions) {
       this.update_content_and_buttons();
@@ -312,7 +293,6 @@ createApp({
       this.$nextTick(function () {
         const div = document.querySelector('#ft_content').querySelector('iframe');
         if(!lng && (div === null || div.length===0)){
-          // this.typesetMathjax_hljs();
           indirectEval(this.ft_javascript);
         }
       });
@@ -322,14 +302,20 @@ createApp({
     }
   },
   computed: {
+    ...mapState(useAssignmentsStore, {
+      assignments_loaded: 'loaded'
+    }),
+    ...mapState(useAssignmentsStore, {
+      assignments_loading_error: 'error'
+    }),
     outOfDate() {
       if(this.ft_pars.id === undefined){
         return true;
       }
-    
+
       const id_mismatch = this.ft_id.trim() !== this.ft_pars.id.trim();
-      // If we're in assignment mode, then the seed and solutions 
-      // are irrelevant (they will be ignored)
+      // If we're in assignment mode, then the seed and solutions are irrelevant 
+      // (they will be ignored)
       const seed_mismatch = (this.ft_seed.trim() !== this.ft_pars.seed.trim() && !this.ft_pars.assignment_mode);
       const solutions_mismatch = (this.ft_solutions !== this.ft_pars.solutions && !this.ft_pars.assignment_mode);
       const mode_mismatch = this.ft_assignment_mode !== this.ft_pars.assignment_mode;
@@ -345,43 +331,23 @@ createApp({
     }
   },
   async created() {
-    fetch(`${this.ft_api}/ft3/api/v1/assignments${this.ft_initial_assignment_string}`, {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-    })
-    .then(async response => {
-        const isJson = response.headers.get('content-type')?.includes('application/json');
-        const data = isJson ? await response.json() : null;
-
-        // check for error response
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = (data && data.detail) || ('Error: '+ response.status);
-          return Promise.reject(error);
-        }
-        // Recode for v-select
-        this.ft_assignments = data.flatMap((el) => {
-	        return [ 
-  	        { title: el.text, type: 'header' }, 
-            el.children.map( (el) => { 
-              return { title: el.text, value: el.id, disabled: el.disabled } 
-              })
-          ].flat()
-        });
-        this.assignments_loaded = true;
-      })
-    .catch(error => {
-      this.loading = false;
-      this.error = true;
-      this.error_text = error;
-    });
+    await assignmentsStore.retrieveAssignments(this.ft_api, this.ft_initial_assignment, this.ft_auth_token);
   }
 },
 {
     ft_api: app_settings.api_location,
-    ft_auth_token: params.token !== null ? params.token : '',
-    ft_initial_assignment_string: params.assignment === undefined ? '' : `?assignment=${params.assignment}`,
+    ft_auth_token: params.token,
+    ft_initial_assignment: params.assignment,
     ft_practice_mode_message: app_settings.practice_mode_message,
-    ft_assignment_mode_message: app_settings.assignment_mode_message
-})
-.use(vuetify)
-.mount('#flexTeaching-app')
+    ft_assignment_mode_message: app_settings.assignment_mode_message,
+    immediateUpdateWhenCached: true,
+});
+
+app.use(vuetify).use(pinia);
+
+const assignmentsStore = useAssignmentsStore();
+
+app.mount('#flexTeaching-app')
+
+
+
