@@ -16,8 +16,6 @@
 	<script src="https://unpkg.com/vue@latest"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.js"></script>
-  <script src="https://unpkg.com/vue-demi"></script>
-  <script src="https://unpkg.com/pinia"></script>
   
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
 
@@ -75,22 +73,26 @@
 
         <v-toolbar-title>FlexTeaching3</v-toolbar-title>
         
-        <label class="toggle">
-          <input type="checkbox" v-model='ft_assignment_mode' :disabled="ft_locked">
-          <span class="slider"></span>
-          <span class="labels" data-on="Assignment" data-off="Practice"></span>
-        </label>   
+        <mode-switcher
+          :assignment-mode-init='ft_initial_mode'
+          :assignment-mode-message='ft_assignment_mode_message'
+          :practice-mode-message='ft_practice_mode_message'
+          :locked='ft_locked'
+          @mode-switch='modeSwitch'
+        ></mode-switcher>
 
         <v-spacer></v-spacer>
-        <v-autocomplete v-model="ft_assignment" :items="ft_assignments" label="Select assignment:" :disabled="ft_locked" no-data-text='No matching assignments found.'>
-            <!-- See: https://github.com/vuetifyjs/vuetify/issues/16792 -->
-            <template v-slot:item="{ item, props }">
-              <v-divider v-if="item.raw.type === 'divider'"></v-divider>
-              <v-list-subheader v-else-if="item.raw.type === 'header'">{{item.title}}</v-list-subheader>
-              <v-list-item v-else v-bind="props" :disabled="item.raw.disabled"></v-list-item>
-            </template>
-          </v-autocomplete>
-        </v-app-bar>
+        
+        <assignments-list
+          :api_location='ft_api' 
+          :initial_assignment='ft_initial_assignment' 
+          :auth_token='ft_auth_token'
+          :locked='ft_locked'
+          @new-assignment='newAssignment'
+          @assignments-loaded='assignmentsLoaded'
+          @assignments-loading-error='displayError'
+          ></assignments-list>
+      </v-app-bar>
 
       <v-main>
         <v-container fluid>
@@ -185,24 +187,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  
-    <v-dialog
-    v-model="switch_mode_dialog"
-    width="auto"
-    >
-    <v-card>
-      <v-card-text class="text-left" v-if='!ft_assignment_mode'>{{ft_practice_mode_message}}
-      </v-card-text>
-      <v-card-text class="text-left" v-if='ft_assignment_mode'>{{ft_assignment_mode_message}}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" block @click="switch_mode_dialog = false">OK</v-btn>
-      </v-card-actions>
-      </v-card>
-    </v-dialog>
 
-  
-    
   </div><!-- end ft3 app-->
 
   <script src="js/flexTeaching.js" type = "module"></script>

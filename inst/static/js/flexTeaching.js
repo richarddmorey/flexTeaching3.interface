@@ -1,12 +1,10 @@
 const { createApp } = Vue;
 const { createVuetify } = Vuetify;
-const { defineStore, createPinia, mapState, mapActions } = Pinia;
 
-const vuetify = createVuetify();
-const pinia = createPinia(); 
+import assignmentsList from './ft3_components/assignmentsList.js';
+import modeSwitcher from './ft3_components/modeSwitcher.js';
 
 import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
-import useAssignmentsStore from './ft3_components/assignmentsStore.js';
 
 const indirectEval = eval;
 const app_settings = JSON.parse(
@@ -21,10 +19,11 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
   get: (searchParams, prop) => searchParams.get(prop),
 });
 
-const app = createApp({
-  //components: {
-  //  ButtonCounter
-  //},
+createApp({
+  components: {
+    assignmentsList,
+    modeSwitcher
+  },
   props: {
     ft_api: {
       type: String,
@@ -46,6 +45,14 @@ const app = createApp({
       type: String,
       required: false
     },
+    ft_initial_mode: {
+      type: Boolean,
+      required: false
+    },
+    ft_locked: {
+      type: Boolean,
+      required: false
+    },
     immediateUpdateWhenCached: {
       type: Boolean,
       required: true
@@ -53,11 +60,10 @@ const app = createApp({
   },
   data() {
     return { 
-      ft_assignment_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
+      ft_assignment_mode: this.ft_initial_mode,
       ft_id: params.id ? params.id.trim() : '',
       ft_seed: params.seed ? params.seed.trim() : 's33d',
       ft_solutions: params.solutions ? params.solutions === 'true' : false,
-      ft_locked: params.lock ? params.lock === 'true' : false,
       ft_buttons: [],
       ft_masterseed: '',
       ft_content: '',
@@ -67,14 +73,30 @@ const app = createApp({
       ft_identicon: '',
       ft_javascript: '',
       ft_pars: {},
+      assignments_loaded: false,
       loading: true,
       error: false,
-      error_text: "",
-      switch_mode_dialog: false,
+      error_text: '',
       drawer: true,
     }
   },
   methods: {
+    modeSwitch(assignmentMode){
+      this.ft_assignment_mode = assignmentMode;
+      if(this.assignments_loaded)
+        this.update_content_and_buttons();
+    },
+    assignmentsLoaded(){
+      this.loading = false;
+      this.assignments_loaded = true;
+    },
+    newAssignment(assignment){
+      this.ft_assignment = assignment;
+    },
+    displayError(when, error){
+      this.error = true;
+      this.error_text = `There was an error when ${when}: ${error}`;
+    },
     copySeed() {
       navigator.clipboard.writeText(this.ft_seed);
     },
@@ -168,12 +190,6 @@ const app = createApp({
     }
   },
   watch: {
-    assignments_loading_error(error){
-      if(!error) return;
-      this.loading = false;
-      this.error = true;
-      this.error_text = assignmentsStore.errorText;
-    },
     ft_new_content_config: {
       async handler(config, oldConfig) {
         const settings = config.settings;
@@ -247,41 +263,11 @@ const app = createApp({
         });
       }
     },
-    ft_assignment_mode: {
-      handler(assignment_mode){
-        if(this.assignments_loaded) this.update_content_and_buttons();
-        this.switch_mode_dialog = 
-          (assignment_mode && this.ft_assignment_mode_message !== '') || 
-          (!assignment_mode && this.ft_practice_mode_message !== '');
-        },
-        immediate: true
-    },
     ft_assignment(assignment){
       this.updateSeed()
         .then(_ => {
           this.update_content_and_buttons();
         })
-    },
-    assignments_loaded(loaded){
-      const data = assignmentsStore.assignments;
-		  // Recode for v-select
-		  this.ft_assignments = data.flatMap((el) => {
-			  return [{
-				    title: el.text,
-					  type: 'header'
-				  },
-				  el.children.map((el) => {
-					return {
-						  title: el.text,
-						  value: el.id,
-						  disabled: el.disabled
-					  }
-				  })
-			   ].flat()
-		  });
-     this.loading = !loaded;
-     if(loaded)
-        this.ft_assignment = this.ft_initial_assignment || assignmentsStore.firstAssignment;
     },
     ft_solutions(solutions) {
       this.update_content_and_buttons();
@@ -302,12 +288,6 @@ const app = createApp({
     }
   },
   computed: {
-    ...mapState(useAssignmentsStore, {
-      assignments_loaded: 'loaded'
-    }),
-    ...mapState(useAssignmentsStore, {
-      assignments_loading_error: 'error'
-    }),
     outOfDate() {
       if(this.ft_pars.id === undefined){
         return true;
@@ -329,25 +309,20 @@ const app = createApp({
     query_string() {
       return `?assignment=${encodeURIComponent(this.ft_assignment)}&id=${encodeURIComponent(this.ft_id.trim())}&seed=${encodeURIComponent(this.ft_seed.trim())}&solutions=${this.ft_solutions}&assignment_mode=${this.ft_assignment_mode}`
     }
-  },
-  async created() {
-    await assignmentsStore.retrieveAssignments(this.ft_api, this.ft_initial_assignment, this.ft_auth_token);
   }
 },
 {
     ft_api: app_settings.api_location,
     ft_auth_token: params.token,
     ft_initial_assignment: params.assignment,
+    ft_initial_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
     ft_practice_mode_message: app_settings.practice_mode_message,
     ft_assignment_mode_message: app_settings.assignment_mode_message,
-    immediateUpdateWhenCached: true,
-});
-
-app.use(vuetify).use(pinia);
-
-const assignmentsStore = useAssignmentsStore();
-
-app.mount('#flexTeaching-app')
+    ft_locked: params.lock ? params.lock === 'true' : false,
+    immediateUpdateWhenCached: true
+})
+.use(createVuetify())
+.mount('#flexTeaching-app');
 
 
 
