@@ -117,18 +117,17 @@
                 <v-checkbox label="Show solutions?" id="ft_solutions_checkbox" v-model="ft_solutions" :disabled="ft_locked"></v-checkbox>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item>
-                <v-tooltip text="Copy seed to clipboard">
-                <template v-slot:activator="{ props }">
-                  <v-btn v-bind="props" @click="copySeed">&#128203;</v-btn>
-                </template>
-              </v-tooltip>
-                <v-text-field id="ft_seed_textbox" v-model="ft_seed" :disabled='ft_masterseed !== "" || ft_locked' label="Seed" @keyup.enter.native="update_content_and_buttons"></v-text-field>
-            </v-list-item>
-            <v-divider></v-divider>
-            <v-list-item>
-              <v-text-field id="ft_masterseed_textbox" v-model="ft_masterseed"  :disabled="ft_locked" label="Master seed" @keyup.enter.native="update_content_and_buttons"></v-text-field>
-            </v-list-item>
+              <seed-input
+                :api-location='ft_api'
+                :assignment-init='ft_assignment'
+                :auth-token='ft_auth_token'
+                :seed-init='ft_initial_seed'
+                :locked='ft_locked'
+                @update-seed='newSeed'
+                @update-seed-error='displayError'
+                ref='seedInputComponent'
+              >
+              </seed-input>
             </v-list>
           </v-list-item>
         </v-list>

@@ -3,6 +3,7 @@ const { createVuetify } = Vuetify;
 
 import assignmentsList from './ft3_components/assignmentsList.js';
 import modeSwitcher from './ft3_components/modeSwitcher.js';
+import seedInput from './ft3_components/seedInput.js';
 
 import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
 
@@ -22,7 +23,8 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
 createApp({
   components: {
     assignmentsList,
-    modeSwitcher
+    modeSwitcher,
+    seedInput
   },
   props: {
     ft_api: {
@@ -49,6 +51,10 @@ createApp({
       type: Boolean,
       required: false
     },
+    ft_initial_seed: {
+      type: String,
+      required: false
+    },
     ft_locked: {
       type: Boolean,
       required: false
@@ -62,10 +68,9 @@ createApp({
     return { 
       ft_assignment_mode: this.ft_initial_mode,
       ft_id: params.id ? params.id.trim() : '',
-      ft_seed: params.seed ? params.seed.trim() : 's33d',
+      ft_seed: this.ft_initial_seed,
       ft_solutions: params.solutions ? params.solutions === 'true' : false,
       ft_buttons: [],
-      ft_masterseed: '',
       ft_content: '',
       ft_new_content_config: {},
       ft_assignments: [],
@@ -92,13 +97,20 @@ createApp({
     },
     newAssignment(assignment){
       this.ft_assignment = assignment;
+      this.$refs.seedInputComponent.assignment = assignment;
+      this.$refs.seedInputComponent.computeSeed()
+        .then(_=>{
+          this.update_content_and_buttons();
+        });
+    },
+    newSeed(seed, trigger){
+      this.ft_seed = seed;
+      if(trigger)
+        this.update_content_and_buttons();
     },
     displayError(when, error){
       this.error = true;
       this.error_text = `There was an error when ${when}: ${error}`;
-    },
-    copySeed() {
-      navigator.clipboard.writeText(this.ft_seed);
     },
     async downloadFile(url){
       await createFileDownload( url, this.ft_auth_token);
@@ -161,18 +173,6 @@ createApp({
         this.error = true;
         this.error_text = error;
       });
-    },
-    async updateSeed() {
-      const masterseed = this.ft_masterseed;
-      if(masterseed === '') return;
-      const url = 
-        `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}` +
-        `/seed?masterseed=${masterseed}`;
-      const response = await fetch(url, {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-      });
-      const { pars: pars } = await response.json();
-      this.ft_seed = pars.seed;
     },
     async checkCache() {
       const settings = 
@@ -263,17 +263,8 @@ createApp({
         });
       }
     },
-    ft_assignment(assignment){
-      this.updateSeed()
-        .then(_ => {
-          this.update_content_and_buttons();
-        })
-    },
     ft_solutions(solutions) {
       this.update_content_and_buttons();
-    },
-    ft_masterseed(masterseed){
-      if(masterseed !== '') this.updateSeed();
     },
     loading(lng){
       this.$nextTick(function () {
@@ -316,6 +307,7 @@ createApp({
     ft_auth_token: params.token,
     ft_initial_assignment: params.assignment,
     ft_initial_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
+    ft_initial_seed: params.seed ? params.seed.trim() : 's33d',
     ft_practice_mode_message: app_settings.practice_mode_message,
     ft_assignment_mode_message: app_settings.assignment_mode_message,
     ft_locked: params.lock ? params.lock === 'true' : false,

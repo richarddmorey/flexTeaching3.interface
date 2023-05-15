@@ -24,9 +24,6 @@ export default {
     loaded(l){
       if(l && !this.error)
         this.$emit('assignmentsLoaded');
-    },
-    error(e){
-      this.$emit('assignmentsLoadingError', 'loading assignments', this.errorText);
     }
   },
   computed: {
@@ -68,8 +65,7 @@ export default {
 			})
 		.catch(error => {
 		  this.loaded = false;
-			this.error = true;
-			this.errorText = error;
+		  this.$emit('assignmentsLoadingError', 'loading assignments', error);
 		});
   },
   template: `
