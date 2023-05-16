@@ -6,32 +6,44 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="description" content="">
-	<meta name="author" content="">
+	<meta name="author" content="Richard D. Morey">
 	<meta name="keywords" content="">
+	<meta name="robots" content="noindex, nofollow">
 
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 
 	<title>FlexTeaching3</title>
 	
+	<!-- Vue and Vuetify content -->
 	<script src="https://unpkg.com/vue@latest"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/vuetify@3.2.1/dist/vuetify.min.js"></script>
-  
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
 
-	<link href="css/bootstrap.css" rel="stylesheet">	
+	<!-- Google font CSS -->
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	
+	 <!-- font-awsome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js" integrity="sha512-naukR7I+Nk6gp7p5TMA4ycgfxaZBJ7MO5iC3Fp6ySQyKFHOGfpkSZkYVWV5R7u7cfAicxanwYQ5D1e17EfJcMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+  <!-- CSS from rmarkdown (to match look) -->
+	<link href="css/bootstrap.css" rel="stylesheet">
+	
+	<!-- Custom CSS -->
 	<link href="css/ft3_fingerprint.css" rel="stylesheet">	
 	<link href="css/ft3_modals.css" rel="stylesheet">
 	<link href="css/ft3_toggle.css" rel="stylesheet">
 	<link href="css/ft3_buttons.css" rel="stylesheet">
 	<link href="css/ft3_content_containers.css" rel="stylesheet">
 	<link href="css/ft3_media_print.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 	
-  <link rel="stylesheet"
-        href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/default.min.css">
+  <!-- code highlighting CSS and script -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/default.min.css">
   <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
-
+  
+  <!-- MathJax (math script) setup -->
   <script>
     MathJax = {
       tex: {
@@ -43,14 +55,14 @@
     };
   </script>
   <script type="text/javascript" id="MathJax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  
+  <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <!-- jidenticon -->
   <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
         integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
         crossorigin="anonymous"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js" integrity="sha512-naukR7I+Nk6gp7p5TMA4ycgfxaZBJ7MO5iC3Fp6ySQyKFHOGfpkSZkYVWV5R7u7cfAicxanwYQ5D1e17EfJcMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <!---FT3_HEADERS--->
 
@@ -152,7 +164,6 @@
     </v-layout>
   </v-sheet>
   
-
   <loading-overlay ref="loadingOverlayComponent"></loading-overlay>  
   <error-modal ref="errorModalComponent"></error-modal>
 
@@ -160,7 +171,7 @@
 
   <script src="js/flexTeaching.js" type = "module"></script>
 
-<!---FT3_FOOTERS--->  
+<!---FT3_FOOTERS--->
 
 </body>
 

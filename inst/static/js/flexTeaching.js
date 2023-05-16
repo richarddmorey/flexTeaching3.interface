@@ -81,20 +81,23 @@ createApp({
   },
   data() {
     return { 
+      // Core data values from inputs
       ft_assignment_mode: this.ft_initial_mode,
       ft_id: this.ft_initial_id,
       ft_solutions: this.ft_initial_solutions,
       ft_seed: this.ft_initial_seed,
-      ft_buttons: [],
-      ft_content: '',
-      ft_new_content_config: {},
       ft_assignment: '',
+      // Others
       ft_identicon: '',
-      ft_javascript: '',
-      ft_pars: {},
       assignments_loaded: false,
       loading: true,
       showSidebar: true,
+      // Below may be moved to component
+      ft_buttons: [],
+      ft_content: '',
+      ft_new_content_config: {},
+      ft_javascript: '',
+      ft_pars: {},
     }
   },
   methods: {
@@ -308,7 +311,7 @@ createApp({
   }
 },
 {
-    // Props
+    // Prop values
     ft_api: app_settings.api_location,
     ft_auth_token: params.token,
     ft_initial_assignment: params.assignment,
