@@ -22,7 +22,6 @@ export default {
       navigator.clipboard.writeText(this.seed);
     },
     update(trigger){
-      console.log(`Updating seed: ${this.seed}, ${trigger}`);
       this.$emit('updateSeed', this.seed, trigger);
     },
     async computeSeed(){

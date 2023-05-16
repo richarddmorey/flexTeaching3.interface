@@ -2,9 +2,9 @@ import { fetchContent } from './ft3_utilities.js';
 
 export default {
   props: {
-    api_location: String,
-    initial_assignment: String,
-    auth_token: String,
+    apiLocation: String,
+    initialAssignment: String,
+    authToken: String,
     locked: Boolean
   },
   emits: ['newAssignment', 'assignmentsLoaded', 'assignmentsLoadingError'],
@@ -52,9 +52,9 @@ export default {
 	  }
   },
   async created() {
-    const initial_str = this.initial_assignment && this.initial_assignment !== '' ? `?assignment=${this.initial_assignment}` : '';
-		const options = this.auth_token ? { headers: { Authorization: `Bearer ${this.auth_token}` } } : {};
-		fetchContent(`${this.api_location}/ft3/api/v1/assignments${initial_str}`, options)
+    const initialStr = this.initialAssignment && this.initialAssignment !== '' ? `?assignment=${this.initialAssignment}` : '';
+		const options = this.authToken ? { headers: { Authorization: `Bearer ${this.authToken}` } } : {};
+		fetchContent(`${this.apiLocation}/ft3/api/v1/assignments${initialStr}`, options)
 		.then(data => {
 			 if(data.length === 0){
 			   throw new Error('There were no assignments retrieved.');

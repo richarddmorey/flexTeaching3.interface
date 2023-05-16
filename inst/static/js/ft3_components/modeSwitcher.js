@@ -35,7 +35,6 @@ export default {
     <v-dialog
       v-model="dialog"
       width="auto"
-      content-class="elevation-25"
     >
       <v-card>
         <v-card-text class="text-left" v-if='!assignmentMode'>{{practiceModeMessage}}

@@ -69,7 +69,7 @@
         :color="ft_assignment_mode ? 'indigo' : 'blue-gray-lighten-4'"
         prominent
       >
-        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon variant="text" @click.stop="showSidebar = !showSidebar"></v-app-bar-nav-icon>
 
         <v-toolbar-title>FlexTeaching3</v-toolbar-title>
         
@@ -84,9 +84,9 @@
         <v-spacer></v-spacer>
         
         <assignments-list
-          :api_location='ft_api' 
-          :initial_assignment='ft_initial_assignment' 
-          :auth_token='ft_auth_token'
+          :api-location='ft_api' 
+          :initial-assignment='ft_initial_assignment' 
+          :auth-token='ft_auth_token'
           :locked='ft_locked'
           @new-assignment='newAssignment'
           @assignments-loaded='assignmentsLoaded'
@@ -98,7 +98,7 @@
         <v-container fluid>
           
         <v-navigation-drawer
-        v-model="drawer"
+        v-model="showSidebar"
         permanent
         :color="ft_assignment_mode ? 'indigo-lighten-5' : ''"
         >
@@ -143,7 +143,7 @@
             scroll-strategy='block'
           ></v-overlay>
           <v-toolbar color='white'>
-            <v-btn v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || error || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
+            <v-btn v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
           </v-toolbar>
           <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
         </v-card>
@@ -152,40 +152,9 @@
     </v-layout>
   </v-sheet>
   
-  <!-- Loading overlay -->
-  <v-overlay
-    :model-value="loading"
-    class="align-center justify-center ft3_overlay_blur"
-    persistent
-    scroll-strategy='block'
-  >
-    <v-progress-circular
-      color="primary"
-      indeterminate
-      size="64"
-    ></v-progress-circular>
-  </v-overlay>
-  
-  <!-- Modal for errors -->
-  <v-dialog
-  v-model="error"
-  width="auto"
-  >
-    <v-card>
-      <v-container>
-        <v-row>
-      <v-col cols=2 style='color: red;font-size: 200%;'>&#9888;</v-col>
-      <v-col>
-      <v-card-text class="text-left">{{error_text}}
-      </v-card-text>
-      </v-col>
-      </v-row>
-      </v-container>
-      <v-card-actions>
-        <v-btn color="primary" block @click="error = false">OK</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+
+  <loading-overlay ref="loadingOverlayComponent"></loading-overlay>  
+  <error-modal ref="errorModalComponent"></error-modal>
 
   </div><!-- end ft3 app-->
 

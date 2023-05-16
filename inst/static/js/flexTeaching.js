@@ -4,10 +4,15 @@ const { createVuetify } = Vuetify;
 import assignmentsList from './ft3_components/assignmentsList.js';
 import modeSwitcher from './ft3_components/modeSwitcher.js';
 import seedInput from './ft3_components/seedInput.js';
+import errorModal from './ft3_components/errorModal.js';
+import loadingOverlay from './ft3_components/loadingOverlay.js';
 
 import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval
 const indirectEval = eval;
+
+// Get the settings that were injected by flexteaching3.interface
 const app_settings = JSON.parse(
   atob(
     document.querySelector('#flexTeaching-app').dataset.settings
@@ -22,9 +27,11 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
 
 createApp({
   components: {
+    loadingOverlay,
     assignmentsList,
     modeSwitcher,
-    seedInput
+    seedInput,
+    errorModal
   },
   props: {
     ft_api: {
@@ -55,6 +62,14 @@ createApp({
       type: String,
       required: false
     },
+    ft_initial_solutions: {
+      type: Boolean,
+      required: false
+    },
+    ft_initial_id: {
+      type: String,
+      required: false
+    },
     ft_locked: {
       type: Boolean,
       required: false
@@ -67,22 +82,19 @@ createApp({
   data() {
     return { 
       ft_assignment_mode: this.ft_initial_mode,
-      ft_id: params.id ? params.id.trim() : '',
+      ft_id: this.ft_initial_id,
+      ft_solutions: this.ft_initial_solutions,
       ft_seed: this.ft_initial_seed,
-      ft_solutions: params.solutions ? params.solutions === 'true' : false,
       ft_buttons: [],
       ft_content: '',
       ft_new_content_config: {},
-      ft_assignments: [],
       ft_assignment: '',
       ft_identicon: '',
       ft_javascript: '',
       ft_pars: {},
       assignments_loaded: false,
       loading: true,
-      error: false,
-      error_text: '',
-      drawer: true,
+      showSidebar: true,
     }
   },
   methods: {
@@ -109,8 +121,7 @@ createApp({
         this.update_content_and_buttons();
     },
     displayError(when, error){
-      this.error = true;
-      this.error_text = `There was an error when ${when}: ${error}`;
+      this.$refs.errorModalComponent.errorText = `There was an error when ${when}: ${error}`;
     },
     async downloadFile(url){
       await createFileDownload( url, this.ft_auth_token);
@@ -169,9 +180,7 @@ createApp({
         this.ft_new_content_config = data.configuration;
       })
       .catch((error)=>{
-        this.loading = false;
-        this.error = true;
-        this.error_text = error;
+        this.displayError('getting new content settings', error);
       });
     },
     async checkCache() {
@@ -243,9 +252,7 @@ createApp({
           this.ft_javascript = javascript;
         })
         .catch(error => {
-          this.loading = false;
-          this.error = true;
-          this.error_text = error;
+          this.displayError('getting new content', error);
         });
       },
       deep: true,
@@ -267,15 +274,13 @@ createApp({
       this.update_content_and_buttons();
     },
     loading(lng){
+      this.$refs.loadingOverlayComponent.loading = lng;
       this.$nextTick(function () {
         const div = document.querySelector('#ft_content').querySelector('iframe');
         if(!lng && (div === null || div.length===0)){
           indirectEval(this.ft_javascript);
         }
       });
-    },
-    error(err){
-      if(!err) this.error_text = '';
     }
   },
   computed: {
@@ -303,11 +308,14 @@ createApp({
   }
 },
 {
+    // Props
     ft_api: app_settings.api_location,
     ft_auth_token: params.token,
     ft_initial_assignment: params.assignment,
     ft_initial_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
     ft_initial_seed: params.seed ? params.seed.trim() : 's33d',
+    ft_initial_solutions: params.solutions ? params.solutions === 'true' : false,
+    ft_initial_id: params.id ? params.id.trim() : '',
     ft_practice_mode_message: app_settings.practice_mode_message,
     ft_assignment_mode_message: app_settings.assignment_mode_message,
     ft_locked: params.lock ? params.lock === 'true' : false,
