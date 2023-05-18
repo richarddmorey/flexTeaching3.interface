@@ -124,7 +124,7 @@
 						</div>
           </v-list-item>
           <v-list-item>
-            <v-list v-if='!ft_assignment_mode'>
+            <v-list v-show='!ft_assignment_mode'>
               <v-list-item>
                 <v-checkbox label="Show solutions?" id="ft_solutions_checkbox" v-model="ft_solutions" :disabled="ft_locked"></v-checkbox>
               </v-list-item>
@@ -165,7 +165,7 @@
   </v-sheet>
   
   <loading-overlay ref="loadingOverlayComponent"></loading-overlay>  
-  <error-modal ref="errorModalComponent"></error-modal>
+  <message-modal type="error" ref="errorModalComponent"></message-modal>
 
   </div><!-- end ft3 app-->
 

@@ -4,7 +4,7 @@ const { createVuetify } = Vuetify;
 import assignmentsList from './ft3_components/assignmentsList.js';
 import modeSwitcher from './ft3_components/modeSwitcher.js';
 import seedInput from './ft3_components/seedInput.js';
-import errorModal from './ft3_components/errorModal.js';
+import messageModal from './ft3_components/messageModal.js';
 import loadingOverlay from './ft3_components/loadingOverlay.js';
 
 import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
@@ -31,7 +31,7 @@ createApp({
     assignmentsList,
     modeSwitcher,
     seedInput,
-    errorModal
+    messageModal
   },
   props: {
     ft_api: {
@@ -124,7 +124,7 @@ createApp({
         this.update_content_and_buttons();
     },
     displayError(when, error){
-      this.$refs.errorModalComponent.errorText = `There was an error when ${when}: ${error}`;
+      this.$refs.errorModalComponent.messageText = `There was an error when ${when}: ${error}`;
     },
     async downloadFile(url){
       await createFileDownload( url, this.ft_auth_token);
