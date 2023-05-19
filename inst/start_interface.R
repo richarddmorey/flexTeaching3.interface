@@ -3,7 +3,7 @@ library(flexTeaching3.api)
 
 flexTeaching3.api::ft3_options(master_secret = 'curious_capybara')
 
-if(exists(assignments_pkg)){
+if(exists('assignments_pkg')){
   flexTeaching3.api::ft3_options(assignments_pkg = assignments_pkg)
 }else{
   flexTeaching3.api::ft3_options(assignments_pkg = 'flexTeaching3.examples')
