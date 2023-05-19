@@ -1,4 +1,3 @@
-import { fetchContent } from './ft3_utilities.js';
 
 export default {
   props: {

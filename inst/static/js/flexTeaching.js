@@ -5,7 +5,6 @@ import assignmentsList from './ft3_components/assignmentsList.js';
 import modeSwitcher from './ft3_components/modeSwitcher.js';
 import seedInput from './ft3_components/seedInput.js';
 import messageModal from './ft3_components/messageModal.js';
-import loadingOverlay from './ft3_components/loadingOverlay.js';
 
 import { fetchContent, typeset, createFileDownload } from './ft3_components/ft3_utilities.js';
 
@@ -27,50 +26,49 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
 
 createApp({
   components: {
-    loadingOverlay,
     assignmentsList,
     modeSwitcher,
     seedInput,
     messageModal
   },
   props: {
-    ft_api: {
+    apiLocation: {
       type: String,
       required: true
     },
-    ft_practice_mode_message: {
+    practiceModeMessage: {
       type: String,
       required: false
     },
-    ft_assignment_mode_message: {
+    assignmentModeMessage: {
       type: String,
       required: false
     },
-    ft_auth_token: {
+    authToken: {
       type: String,
       required: false
     },
-    ft_initial_assignment: {
+    initialAssignment: {
       type: String,
       required: false
     },
-    ft_initial_mode: {
+    initialMode: {
       type: Boolean,
       required: false
     },
-    ft_initial_seed: {
+    initialSeed: {
       type: String,
       required: false
     },
-    ft_initial_solutions: {
+    initialSolutions: {
       type: Boolean,
       required: false
     },
-    ft_initial_id: {
+    initialId: {
       type: String,
       required: false
     },
-    ft_locked: {
+    locked: {
       type: Boolean,
       required: false
     },
@@ -82,52 +80,49 @@ createApp({
   data() {
     return { 
       // Core data values from inputs
-      ft_assignment_mode: this.ft_initial_mode,
-      ft_id: this.ft_initial_id,
-      ft_solutions: this.ft_initial_solutions,
-      ft_seed: this.ft_initial_seed,
-      ft_assignment: '',
+      assignmentMode: this.initialMode,
+      id: this.initialId,
+      solutions: this.initialSolutions,
+      seed: this.initialSeed,
+      assignment: '',
       // Others
-      ft_identicon: '',
-      assignments_loaded: false,
-      loading: true,
+      identicon: '',
+      assignmentsAreLoaded: false,
+      loading: false,
       showSidebar: true,
+      fetchOptions: this.authToken ? { headers: { Authorization: `Bearer ${this.authToken}` } } : {},
       // Below may be moved to component
-      ft_buttons: [],
-      ft_content: '',
-      ft_new_content_config: {},
-      ft_javascript: '',
-      ft_pars: {},
+      buttons: [],
+      content: '',
+      contentType: '',
+      iframeSrc: '',
+      newContentConfig: {},
+      javascript: '',
+      pars: {},
     }
   },
   methods: {
-    modeSwitch(assignmentMode){
-      this.ft_assignment_mode = assignmentMode;
-      if(this.assignments_loaded)
-        this.update_content_and_buttons();
-    },
-    assignmentsLoaded(){
-      this.loading = false;
-      this.assignments_loaded = true;
+    queryString(){
+      return `?assignment=${encodeURIComponent(this.assignment)}&id=${encodeURIComponent(this.id.trim())}&seed=${encodeURIComponent(this.seed.trim())}&solutions=${this.solutions}&assignment_mode=${this.assignmentMode}`;
     },
     newAssignment(assignment){
-      this.ft_assignment = assignment;
+      this.assignment = assignment;
       this.$refs.seedInputComponent.assignment = assignment;
       this.$refs.seedInputComponent.computeSeed()
         .then(_=>{
-          this.update_content_and_buttons();
+          this.updateContentAndButtons();
         });
     },
     newSeed(seed, trigger){
-      this.ft_seed = seed;
+      this.seed = seed;
       if(trigger)
-        this.update_content_and_buttons();
+        this.updateContentAndButtons();
     },
     displayError(when, error){
       this.$refs.errorModalComponent.messageText = `There was an error when ${when}: ${error}`;
     },
     async downloadFile(url){
-      await createFileDownload( url, this.ft_auth_token);
+      await createFileDownload( url, this.authToken);
     },
     async typesetMathjax_hljs(){
       await typeset(() => {
@@ -138,78 +133,64 @@ createApp({
         hljs.highlightElement(el.parentNode);
       })
     },
-    update_content_and_buttons(){
+    updateContentAndButtons(){
+      if(this.loading) return;
       this.loading = true;
-      this.new_content()
+      this.newContent()
         .then(_ => {
-          return this.new_buttons();
+          return this.newButtons();
         });
     },
-    async new_buttons() {
-      const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}/files`
-      const response = await fetch(url, {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-      });
+    async newButtons() {
+      const url = `${this.apiLocation}/ft3/api/v1/assignments/${this.assignment}/files`;
+      const response = await fetch(url, this.fetchOptions);
       const { file_list: file_list } = await response.json();
-
-      const settings = 
-        `id=${this.ft_id.trim()}&` +
-        `seed=${this.ft_seed.trim()}&` +
-        `solutions=${this.ft_solutions}&` +
-        `assignment_mode=${this.ft_assignment_mode}`;
-
+      
+      const qs = this.queryString();
       const buttons = Object.keys(file_list).map(function(key){
         return {
           label: file_list[key].label,
           icon: file_list[key].icon,
-          url: url + `/${encodeURIComponent(key)}?${settings}`
+          url: url + `/${encodeURIComponent(key)}${qs}`
           }
       });
-      this.ft_buttons = buttons;
+      this.buttons = buttons;
     },
-    async new_content() {
-      const settings = 
-        `id=${this.ft_id.trim()}&` +
-        `seed=${this.ft_seed.trim()}&` +
-        `solutions=${this.ft_solutions}&` +
-        `assignment_mode=${this.ft_assignment_mode}`;
-      const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}`;
+    async newContent() {
+      const url = `${this.apiLocation}/ft3/api/v1/assignments/${this.assignment}`;
       fetchContent(
-        `${url}/configuration?${settings}`, 
-        this.ft_auth_token ? { headers: { Authorization: `Bearer ${this.ft_auth_token}` } } : {} )
+        `${url}/configuration${this.queryString()}`, this.fetchOptions)
       .then((data)=>{
         data.configuration.url = url;
-        data.configuration.settings = settings;
-        this.ft_new_content_config = data.configuration;
+        data.configuration.settings = this.queryString();
+        this.newContentConfig = data.configuration;
       })
       .catch((error)=>{
-        this.displayError('getting new content settings', error);
+        this.displayError(`getting new content settings for assignment ${this.assignment}`, error);
       });
     },
     async checkCache() {
-      const settings = 
-        `id=${this.ft_id.trim()}&` +
-        `seed=${this.ft_seed.trim()}&` +
-        `solutions=${this.ft_solutions}&` +
-        `assignment_mode=${this.ft_assignment_mode}`;
-      const url = `${this.ft_api}/ft3/api/v1/assignments/${this.ft_assignment}`;
-      const response = await fetch(`${url}/cachekey?${settings}`, {
-        headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-      });
+      const url = `${this.apiLocation}/ft3/api/v1/assignments/${this.assignment}`;
+      const response = await fetch(`${url}/cachekey${this.queryString()}`, this.fetchOptions );
       const { cached: cached } = await response.json();
 
       return cached;
     }
   },
   watch: {
-    ft_new_content_config: {
+    outOfDate(o){
+      if(!o || !this.immediateUpdateWhenCached || this.loading) return;
+      this.checkCache()
+        .then((cached) => {
+          if(cached)
+            this.updateContentAndButtons();
+        });
+    },
+    newContentConfig: {
       async handler(config, oldConfig) {
-        const settings = config.settings;
-        const url = `${config.url}?${settings}`;
+        const url = `${config.url}${config.settings}`;
         const javascript = config.file_ext === 'html' && !config.iframe ? config.js : '';
-        fetch(url, {
-          headers: {Authorization: `Bearer ${this.ft_auth_token}`}
-        })
+        fetch(url, this.fetchOptions)
         .then(async response => {
           const isJson = response.headers.get('content-type')?.includes('application/json');
           const data = isJson ? await response.json() : null;
@@ -221,12 +202,13 @@ createApp({
             return Promise.reject(error);
           }
           if(config.file_ext === 'html' && !config.iframe){
+            this.contentType = 'fragment';
             const content = await response.text();
             // Destroy the content then remake, so that DOM elements are
             // considered "new" (is there a better way to do this?)
-            this.ft_content = '';
+            this.content = '';
             this.$nextTick(() => {
-              this.ft_content = content;
+              this.content = content;
               this.typesetMathjax_hljs();
             });
             return;
@@ -235,24 +217,21 @@ createApp({
           if(config.file_ext !== 'html' && config.file_ext !== 'pdf'){
             return Promise.reject('Error: Content file extension was of unexpected type.');
           }
+          this.contentType = config.file_ext;
           const blob = await response.blob();
-          const blob_url = URL.createObjectURL(blob);
-          if(config.file_ext === 'html'){
-            this.ft_content = `<iframe id="ft3_html_iframe" class="ft3_content ft3_content_html" src="${blob_url}"></iframe>`;
-          }else if(config.file_ext === 'pdf'){
-            this.ft_content = `<iframe class="ft3_content ft3_content_pdf" src="${blob_url}"></iframe>`;
-          }
+          const blobUrl = URL.createObjectURL(blob);
+          this.iframeSrc = blobUrl;
           setTimeout( () => {
             // free up the memory
-            URL.revokeObjectURL(blob_url);
+            URL.revokeObjectURL(blobUrl);
           }, 5000);
           return;
         })
         .then(()=>{
-          this.ft_pars = config.pars;
-          this.ft_identicon = config.fingerprint;
+          this.pars = config.pars;
+          this.identicon = config.fingerprint;
           this.loading = false;
-          this.ft_javascript = javascript;
+          this.javascript = javascript;
         })
         .catch(error => {
           this.displayError('getting new content', error);
@@ -261,67 +240,61 @@ createApp({
       deep: true,
       immediate: false
     },
-    query_string(qs){
-      if(this.assignments_loaded)
-        window.history.replaceState(null, null, `${qs}&lock=${this.ft_locked}`);
-      if(this.outOfDate){
-        this.checkCache()
-          .then((cached) => {
-            if(this.immediateUpdateWhenCached && cached && this.outOfDate){
-              this.update_content_and_buttons();
-            }
-        });
-      }
+    qs(q){
+      if(this.assignmentsAreLoaded)
+        window.history.replaceState(null, null, `${q}&lock=${this.locked}`);
     },
-    ft_solutions(solutions) {
-      this.update_content_and_buttons();
+    solutions() {
+      this.updateContentAndButtons();
+    },
+    assignmentMode() {
+      this.updateContentAndButtons();
     },
     loading(lng){
-      this.$refs.loadingOverlayComponent.loading = lng;
+      if(lng || this.contentType !== 'fragment') return;
       this.$nextTick(function () {
-        const div = document.querySelector('#ft_content').querySelector('iframe');
-        if(!lng && (div === null || div.length===0)){
-          indirectEval(this.ft_javascript);
+        const div = document.querySelector('#ft_content')
+        if(div || div.length!==0){
+          indirectEval(this.javascript);
         }
       });
     }
   },
   computed: {
+    qs() {
+      return this.queryString();
+    },
     outOfDate() {
-      if(this.ft_pars.id === undefined){
+      if(this.pars.id === undefined){
         return true;
       }
-
-      const id_mismatch = this.ft_id.trim() !== this.ft_pars.id.trim();
+      const id_mismatch = this.id.trim() !== this.pars.id.trim();
       // If we're in assignment mode, then the seed and solutions are irrelevant 
       // (they will be ignored)
-      const seed_mismatch = (this.ft_seed.trim() !== this.ft_pars.seed.trim() && !this.ft_pars.assignment_mode);
-      const solutions_mismatch = (this.ft_solutions !== this.ft_pars.solutions && !this.ft_pars.assignment_mode);
-      const mode_mismatch = this.ft_assignment_mode !== this.ft_pars.assignment_mode;
-      const assignment_mismatch = this.ft_assignment !== this.ft_pars.assignment;
+      const seed_mismatch = (this.seed.trim() !== this.pars.seed.trim() && !this.pars.assignment_mode);
+      const solutions_mismatch = (this.solutions !== this.pars.solutions && !this.pars.assignment_mode);
+      const mode_mismatch = this.assignmentMode !== this.pars.assignment_mode;
+      const assignment_mismatch = this.assignment !== this.pars.assignment;
       
       return id_mismatch || seed_mismatch || solutions_mismatch || mode_mismatch || assignment_mismatch;
     },
     identicon_html() {
-      return jdenticon.toSvg(this.ft_identicon, 100);
-    },
-    query_string() {
-      return `?assignment=${encodeURIComponent(this.ft_assignment)}&id=${encodeURIComponent(this.ft_id.trim())}&seed=${encodeURIComponent(this.ft_seed.trim())}&solutions=${this.ft_solutions}&assignment_mode=${this.ft_assignment_mode}`
+      return typeof variable === 'undefined' ? jdenticon.toSvg(this.identicon, 100) : '[Error creating jdenticon]';
     }
   }
 },
 {
     // Prop values
-    ft_api: app_settings.api_location,
-    ft_auth_token: params.token,
-    ft_initial_assignment: params.assignment,
-    ft_initial_mode: params.assignment_mode ? params.assignment_mode === 'true' : false,
-    ft_initial_seed: params.seed ? params.seed.trim() : 's33d',
-    ft_initial_solutions: params.solutions ? params.solutions === 'true' : false,
-    ft_initial_id: params.id ? params.id.trim() : '',
-    ft_practice_mode_message: app_settings.practice_mode_message,
-    ft_assignment_mode_message: app_settings.assignment_mode_message,
-    ft_locked: params.lock ? params.lock === 'true' : false,
+    apiLocation: app_settings.api_location,
+    authToken: params.token,
+    initialAssignment: params.assignment,
+    initialMode: params.assignment_mode ? params.assignment_mode === 'true' : false,
+    initialSeed: params.seed ? params.seed.trim() : 's33d',
+    initialSolutions: params.solutions ? params.solutions === 'true' : false,
+    initialId: params.id ? params.id.trim() : '',
+    practiceModeMessage: app_settings.practice_mode_message,
+    assignmentModeMessage: app_settings.assignment_mode_message,
+    locked: params.lock ? params.lock === 'true' : false,
     immediateUpdateWhenCached: true
 })
 .use(createVuetify())

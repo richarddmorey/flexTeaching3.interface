@@ -59,7 +59,7 @@
   <!-- jQuery -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   
-  <!-- jidenticon -->
+  <!-- jdenticon -->
   <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
         integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
         crossorigin="anonymous"></script>
@@ -78,7 +78,7 @@
     <v-layout>
 
       <v-app-bar
-        :color="ft_assignment_mode ? 'indigo' : 'blue-gray-lighten-4'"
+        :color="assignmentMode ? 'indigo' : 'blue-gray-lighten-4'"
         prominent
       >
         <v-app-bar-nav-icon variant="text" @click.stop="showSidebar = !showSidebar"></v-app-bar-nav-icon>
@@ -86,22 +86,23 @@
         <v-toolbar-title>FlexTeaching3</v-toolbar-title>
         
         <mode-switcher
-          :assignment-mode-init='ft_initial_mode'
-          :assignment-mode-message='ft_assignment_mode_message'
-          :practice-mode-message='ft_practice_mode_message'
-          :locked='ft_locked'
-          @mode-switch='modeSwitch'
+          v-if='assignmentsAreLoaded'
+          :assignment-mode-init='initialMode'
+          :assignment-mode-message='assignmentModeMessage'
+          :practice-mode-message='practiceModeMessage'
+          :locked='locked'
+          @mode-switch='(m) => {assignmentMode = m;}'
         ></mode-switcher>
 
         <v-spacer></v-spacer>
         
         <assignments-list
-          :api-location='ft_api' 
-          :initial-assignment='ft_initial_assignment' 
-          :auth-token='ft_auth_token'
-          :locked='ft_locked'
+          :api-location='apiLocation' 
+          :initial-assignment='initialAssignment' 
+          :auth-token='authToken'
+          :locked='locked'
           @new-assignment='newAssignment'
-          @assignments-loaded='assignmentsLoaded'
+          @assignments-loaded='assignmentsAreLoaded = true'
           @assignments-loading-error='displayError'
           ></assignments-list>
       </v-app-bar>
@@ -112,29 +113,29 @@
         <v-navigation-drawer
         v-model="showSidebar"
         permanent
-        :color="ft_assignment_mode ? 'indigo-lighten-5' : ''"
+        :color="assignmentMode ? 'indigo-lighten-5' : ''"
         >
         <v-list>
           <v-list-item>
-            <v-text-field id="ft_id_textbox" v-model="ft_id" placeholder="" :disabled="ft_locked" label="ID" @keyup.enter.native="update_content_and_buttons"></v-text-field>
+            <v-text-field id="id_textbox" v-model="id" placeholder="" :disabled="locked" label="ID" @keyup.enter.native="updateContentAndButtons"></v-text-field>
           </v-list-item>
           <v-list-item>
             <div class="flexteaching-fingerprint-container">
-						  <div v-if="!loading && assignments_loaded && !outOfDate" v-html="identicon_html" id="flexteaching-fingerprint"></div>
+						  <div v-if="!loading && assignmentsAreLoaded && !outOfDate" v-html="identicon_html" id="flexteaching-fingerprint"></div>
 						</div>
           </v-list-item>
           <v-list-item>
-            <v-list v-show='!ft_assignment_mode'>
+            <v-list v-show='!assignmentMode'>
               <v-list-item>
-                <v-checkbox label="Show solutions?" id="ft_solutions_checkbox" v-model="ft_solutions" :disabled="ft_locked"></v-checkbox>
+                <v-checkbox label="Show solutions?" id="solutions_checkbox" v-model="solutions" :disabled="locked"></v-checkbox>
               </v-list-item>
               <v-divider></v-divider>
               <seed-input
-                :api-location='ft_api'
-                :assignment-init='ft_assignment'
-                :auth-token='ft_auth_token'
-                :seed-init='ft_initial_seed'
-                :locked='ft_locked'
+                :api-location='apiLocation'
+                :assignment-init='assignment'
+                :auth-token='authToken'
+                :seed-init='initialSeed'
+                :locked='locked'
                 @update-seed='newSeed'
                 @update-seed-error='displayError'
                 ref='seedInputComponent'
@@ -151,21 +152,41 @@
             class="ft3-reload-modal"
             persistent
             contained
-            @click="update_content_and_buttons"
+            @click="updateContentAndButtons"
             scroll-strategy='block'
           ></v-overlay>
           <v-toolbar color='white'>
-            <v-btn v-for="button in ft_buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
+            <v-btn v-for="button in buttons" @click.prevent="downloadFile(button.url)" class="ft_button" :disabled='loading || outOfDate'><i v-bind:class="button.icon"></i>{{button.label}}</v-btn>
           </v-toolbar>
-          <div class="content_fragment" id="ft_content" v-html="ft_content"></div>
+          <!-- Document content -->
+          <div v-if="contentType==='fragment'" class="content_fragment" id="ft_content" v-html="content"></div>
+          <div v-else class="content_fragment">
+            <iframe v-if="contentType==='html'" :src="iframeSrc" id="ft3_html_iframe" class="ft3_content ft3_content_html"></iframe>
+            <iframe v-if="contentType==='pdf'" :src="iframeSrc" class="ft3_content ft3_content_pdf" ></iframe>
+          </div>
+          <!-- End document content -->
         </v-card>
       </v-container>
       </v-main>
     </v-layout>
   </v-sheet>
   
-  <loading-overlay ref="loadingOverlayComponent"></loading-overlay>  
   <message-modal type="error" ref="errorModalComponent"></message-modal>
+
+  <!-- Loading overlay -->
+  <v-overlay
+    :model-value="!assignmentsAreLoaded || loading"
+    class="align-center justify-center ft3_overlay_blur"
+    persistent
+    scroll-strategy='block'
+  >
+    <v-progress-circular
+      color="primary"
+      indeterminate
+      size="64"
+    ></v-progress-circular>
+  </v-overlay>
+  <!-- end loading overlay -->
 
   </div><!-- end ft3 app-->
 

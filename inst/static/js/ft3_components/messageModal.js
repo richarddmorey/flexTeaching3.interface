@@ -10,6 +10,12 @@ export default {
       dialog: false
     }
   },
+  methods: {
+    reloadPage(){
+      const url = window.location.href.split('?')[0];
+      window.location.replace(url);
+    }
+  },
   computed: {
     icon(){
       return this.type === 'error' ? '&#9888;' : '&#128488;'
@@ -39,7 +45,16 @@ export default {
         </v-row>
       </v-container>
       <v-card-actions>
-        <v-btn color="primary" block @click="messageText=''">OK</v-btn>
+        <v-row>
+          <v-col cols='3'></v-col>
+          <v-col cols='3'>
+            <v-btn color="primary" @click="messageText=''">OK</v-btn>
+          </v-col>
+          <v-col cols='3'>
+            <v-btn color="primary" v-if="type==='error'" @click="reloadPage()">Reload page</v-btn>
+          </v-col>
+          <v-col cols='3'></v-col>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
