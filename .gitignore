@@ -38,6 +38,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+!inst/docker/.Renviron
 
 # pkgdown site
 docs/
@@ -49,6 +50,8 @@ po/*~
 rsconnect/
 
 .Rprofile
+!inst/docker/.Rprofile
+
 renv.lock
 .DS_Store
 renv/*
