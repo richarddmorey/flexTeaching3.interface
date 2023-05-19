@@ -57,3 +57,4 @@ renv.lock
 renv/*
 
 
+inst/docker/build.log

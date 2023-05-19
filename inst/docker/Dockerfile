@@ -17,7 +17,7 @@ EXPOSE 8081
 RUN apt-get update && apt-get install -y --no-install-recommends \
   && apt-get install -y libcairo2-dev libxt-dev curl pandoc imagemagick \
      libmagick++-6.q16-dev librsvg2-dev nodejs npm \
-     libcurl4-openssl-dev libharfbuzz-icu0 wget \
+     libcurl4-openssl-dev libharfbuzz-icu0 wget cmake \
   && rm -rf /var/lib/apt/lists/*
 
 # Install for remotes::install_github
