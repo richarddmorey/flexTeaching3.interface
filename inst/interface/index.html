@@ -171,7 +171,11 @@
     </v-layout>
   </v-sheet>
   
-  <message-modal type="error" ref="errorModalComponent"></message-modal>
+  <message-modal 
+    type="error" 
+    :auth-token='authToken'
+    ref="errorModalComponent"
+  ></message-modal>
 
   <!-- Loading overlay -->
   <v-overlay

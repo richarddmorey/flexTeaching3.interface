@@ -1,7 +1,8 @@
 
 export default {
   props: {
-    type: String
+    type: String,
+    authToken: String
   },
   expose: ['messageText'],
   data() {
@@ -12,7 +13,8 @@ export default {
   },
   methods: {
     reloadPage(){
-      const url = window.location.href.split('?')[0];
+      const tokenStr = this.authToken ? `?token=${this.authToken}` : '';
+      const url = window.location.href.split('?')[0] + tokenStr;
       window.location.replace(url);
     }
   },
