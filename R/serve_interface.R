@@ -15,7 +15,7 @@ prevent_tabnab = RestRserve::Middleware$new(
 #' @param practice_mode_message Message to give when switching to practice mode. Set to empty string to disable.
 #' @param assignment_mode_message Message to give when switching to assignment mode. Set to empty string to disable.
 #' @param http_port Port on which to start the server
-#' @param log_options List of options for the log, to be passed to RestRserve::Logger$new()
+#' @param backend RestRserve backend
 #' @param ... Further arguments to be passed to the RestRserve backend's start() method
 #'
 #' @return The result from the RestRserve backend's start() method
@@ -32,7 +32,7 @@ ft3_serve_interface <- function(
   practice_mode_message = '',
   assignment_mode_message = '',
   http_port = 8081, 
-  log_options = list(level = 'off'),
+  backend = RestRserve::BackendRserve$new(),
   ...
 )
 {
@@ -51,6 +51,9 @@ ft3_serve_interface <- function(
   app = RestRserve::Application$new(
     middleware = list(RestRserve::CORSMiddleware$new(), prevent_tabnab)
   )
+  
+  # Use logger lg defined by .onLoad
+  app$logger = lg
   
   if(is.null(assignments_pkg)){
     apkg_dir <- NULL
@@ -124,7 +127,5 @@ ft3_serve_interface <- function(
       file_path = file.path(apkg_dir, 'support')
     )
   
-  app$logger = do.call(what = RestRserve::Logger$new, args = log_options)
-  backend = RestRserve::BackendRserve$new()
   backend$start(app, http_port = http_port, ...)
 }

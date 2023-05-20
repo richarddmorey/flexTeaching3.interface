@@ -10,7 +10,7 @@ ft3_serve_interface(
   practice_mode_message = "",
   assignment_mode_message = "",
   http_port = 8081,
-  log_options = list(level = "off"),
+  backend = RestRserve::BackendRserve$new(),
   ...
 )
 }
@@ -25,7 +25,7 @@ ft3_serve_interface(
 
 \item{http_port}{Port on which to start the server}
 
-\item{log_options}{List of options for the log, to be passed to RestRserve::Logger$new()}
+\item{backend}{RestRserve backend}
 
 \item{...}{Further arguments to be passed to the RestRserve backend's start() method}
 }
