@@ -1,24 +1,30 @@
 
-export async function fetchContent(url, options, blob){
-  const response = await fetch(url, options);
-  const isJson = response.headers.get('content-type')?.includes('application/json');
-  const data = isJson ? await response.json() : null;
+export async function fetchContent(url, options, errorFunc, thenFunc){
   
-  // check for error response
-	if (!response.ok) {
-	  // get error message from body or default to response status
-	  const error = (isJson && data.detail) || (`Error:  ${response.status}`);
-	  throw new Error(error);
-	}
-  
-  if(isJson){
-    return data;
-  }else if(blob){
-    return response.blob();  
-  }else{
-    return response.text();
+  try{
+    const response = await fetch(url, options);
+    const isJson = response.headers.get('content-type')?.includes('application/json');
+    const data = isJson ? await response.json() : null;
+        
+    // check for error response
+	  if (!response.ok) {
+	    // get error message from body or default to response status
+	    const error = (isJson && data.detail) || (`Error:  ${response.status}`);
+	    throw new Error(error);
+	  }
+	  
+	  if(isJson){
+      return typeof thenFunc === 'function' ? await thenFunc(data) : data;
+    }else{
+      return typeof thenFunc === 'function' ? await thenFunc(response) : response;
+    }
   }
-}
+  catch(error){
+      return typeof errorFunc === 'function' ? errorFunc(error) : error;  
+  }
+}  
+  
+
 
 export function typeset(code) {
   MathJax.startup.promise = MathJax.startup.promise

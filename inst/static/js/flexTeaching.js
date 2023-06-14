@@ -159,15 +159,16 @@ createApp({
     async newContent() {
       const url = `${this.apiLocation}/ft3/api/v1/assignments/${this.assignment}`;
       fetchContent(
-        `${url}/configuration${this.queryString()}`, this.fetchOptions)
-      .then((data)=>{
-        data.configuration.url = url;
-        data.configuration.settings = this.queryString();
-        this.newContentConfig = data.configuration;
-      })
-      .catch((error)=>{
-        this.displayError(`getting new content settings for assignment ${this.assignment}`, error);
-      });
+        `${url}/configuration${this.queryString()}`, 
+        this.fetchOptions,
+        (error)=>{
+          this.displayError(`getting new content settings for assignment ${this.assignment}`, error);
+        },
+        (data)=>{
+          data.configuration.url = url;
+          data.configuration.settings = this.queryString();
+          this.newContentConfig = data.configuration;
+        });
     },
     async checkCache() {
       const url = `${this.apiLocation}/ft3/api/v1/assignments/${this.assignment}`;

@@ -54,19 +54,19 @@ export default {
   async created() {
     const initialStr = this.initialAssignment && this.initialAssignment !== '' ? `?assignment=${this.initialAssignment}` : '';
 		const options = this.authToken ? { headers: { Authorization: `Bearer ${this.authToken}` } } : {};
-		fetchContent(`${this.apiLocation}/ft3/api/v1/assignments${initialStr}`, options)
-		.then(data => {
+		fetchContent(`${this.apiLocation}/ft3/api/v1/assignments${initialStr}`, options,
+		  (error) => {
+		    this.loaded = false;
+		    this.$emit('assignmentsLoadingError', 'loading assignments', error);
+		  },
+		  (data) => {
 			 if(data.length === 0){
 			   throw new Error('There were no assignments retrieved.');
 			 }
 			 this.loaded = true;
 			 this.assignments = data;
 			 this.assignment = this.assignments[0].children[0].id;
-			})
-		.catch(error => {
-		  this.loaded = false;
-		  this.$emit('assignmentsLoadingError', 'loading assignments', error);
-		});
+			});
   },
   template: `
     <v-autocomplete v-model="assignment" :items="flatAssignments" label="Select assignment:" :disabled="locked" no-data-text='No matching assignments found.'>
