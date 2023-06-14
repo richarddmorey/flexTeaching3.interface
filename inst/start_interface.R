@@ -17,6 +17,8 @@ flexTeaching3.api::ft3_options(
   assignments_pkg = ifelse(exists('assignments_pkg'), assignments_pkg, 'flexTeaching3.examples')
   )
 
+api_location = ifelse(exists('api_location'), api_location, 'http://localhost')
+
 # Use root logger lgr and write to file (both logs will be written to this file)
 lgr$set_threshold('debug')
 format(Sys.time(), "ft3_log_%Y-%m-%d_%H:%M.json.log") |>
@@ -30,7 +32,7 @@ backend = RestRserve::BackendRserve$new()
 api <- flexTeaching3.api::ft3_serve_api(background = TRUE, backend = backend)
 
 flexTeaching3.interface::ft3_serve_interface(
-  api_location = 'http://localhost:8080',
+  api_location = paste0(api_location, ':8080'),
   practice_mode_message = 'You are now in practice mode.',
   assignment_mode_message = 'You are now in assignment mode.',
   assignments_pkg = flexTeaching3.api::ft3_options('assignments_pkg'),

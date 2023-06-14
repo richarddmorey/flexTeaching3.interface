@@ -6,12 +6,19 @@ ARG ASN_GITHUB=richarddmorey/flexTeaching3.examples
 ARG ASN_NAME=flexTeaching3.examples
 ENV ASN_NAME="${ASN_NAME}"
 
+ARG API_LOCATION=http://localhost
+ENV API_LOCATION="${API_LOCATION}"
+
 RUN mkdir /home/ft3
 COPY .Renviron .Rprofile /home/ft3/
+
 WORKDIR /home/ft3
 
 EXPOSE 8080
 EXPOSE 8081
+
+RUN mkdir -p /home/ft3/logs
+VOLUME /home/ft3/logs
 
 # Ubuntu dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -44,5 +51,5 @@ RUN Rscript -e "remotes::install_github('$ASN_GITHUB', \
     dependencies = TRUE); \
   "
 
-CMD Rscript -e "assignments_pkg='$ASN_NAME'; system.file('start_interface.R', package = 'flexTeaching3.interface') |> source()"
+CMD Rscript -e "api_location='$API_LOCATION';logdir='/home/ft3/logs';assignments_pkg='$ASN_NAME'; system.file('start_interface.R', package = 'flexTeaching3.interface') |> source()"
 

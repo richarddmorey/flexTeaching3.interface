@@ -58,3 +58,4 @@ renv/*
 
 
 inst/docker/build.log
+inst/docker/docker.build.log
