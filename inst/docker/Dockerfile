@@ -41,7 +41,10 @@ RUN Rscript -e "\
   "
 
 # Install assignment package
-RUN Rscript -e "remotes::install_github('$ASN_GITHUB', dependencies = TRUE)"
+RUN Rscript -e "remotes::install_github('$ASN_GITHUB', \
+  dependencies = TRUE, \ 
+  force = TRUE) ; \
+  "
 
 # Setup packages
 RUN Rscript -e "\
