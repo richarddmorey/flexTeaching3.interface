@@ -16,9 +16,12 @@ Imports:
     jsonlite,
     lgr
 Suggests:
-    flexTeaching3.api
+    flexTeaching3.api,
+    flexTeaching3.examples
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.2.0)
 Remotes: 
     richarddmorey/flexTeaching3.api
+    richarddmorey/flexTeaching3.examples
+    
