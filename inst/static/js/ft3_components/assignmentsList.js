@@ -65,7 +65,7 @@ export default {
 			 }
 			 this.loaded = true;
 			 this.assignments = data;
-			 this.assignment = this.assignments[0].children[0].id;
+			 this.assignment = this.initialAssignment || this.assignments[0].children[0].id;
 			});
   },
   template: `
