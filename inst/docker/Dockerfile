@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.2
+FROM docker.io/rocker/r-ver:4.2
 LABEL maintainer="Richard D. Morey"
 
 ARG ASN_GITHUB=richarddmorey/flexTeaching3.examples
