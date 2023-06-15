@@ -27,29 +27,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
      libcurl4-openssl-dev libharfbuzz-icu0 wget cmake \
   && rm -rf /var/lib/apt/lists/*
 
-# Install for remotes::install_github
-RUN Rscript -e "install.packages('remotes')"
-
 # Install other packages we'll use alongside flexTeaching3
+# For some reason jdenticon is not showing up in the repo, so specify
 RUN Rscript -e "\
-  remotes::install_github('mattroumaya/jdenticon', \
-    dependencies = TRUE); \
-  jdenticon::jdenticon_npm_install(force = TRUE); \
-  install.packages('tinytex'); \
-  tinytex::install_tinytex(); \
+  install.packages('remotes'); \
+  install.packages('jdenticon', repos='http://cran.us.r-project.org'); \
   "
 
 # Install main flexTeaching3 packages
-RUN Rscript -e "remotes::install_github('richarddmorey/flexTeaching3.api', \
-    dependencies = TRUE); \
+RUN Rscript -e "\
   remotes::install_github('richarddmorey/flexTeaching3.interface', \
-    dependencies = TRUE) \
-    "
-
-# Install assignment package
-RUN Rscript -e "remotes::install_github('$ASN_GITHUB', \
-    dependencies = TRUE); \
+  dependencies = TRUE) \
   "
 
-CMD Rscript -e "api_location='$API_LOCATION';logdir='/home/ft3/logs';assignments_pkg='$ASN_NAME'; system.file('start_interface.R', package = 'flexTeaching3.interface') |> source()"
+# Install assignment package
+RUN Rscript -e "remotes::install_github('$ASN_GITHUB', dependencies = TRUE)"
+
+# Setup packages
+RUN Rscript -e "\
+  tinytex::install_tinytex(); \
+  jdenticon::jdenticon_npm_install(force = TRUE); \
+  "
+
+CMD Rscript -e "\
+  api_location='$API_LOCATION'; \
+  assignments_pkg='$ASN_NAME'; \
+  logdir='/home/ft3/logs'; \
+  system.file( \
+    'start_interface.R', \
+    package = 'flexTeaching3.interface' \
+    ) |> source()"
 
